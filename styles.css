@@ -1,0 +1,36 @@
+.defluff-summary {
+  border-radius: 6px;
+}
+
+/* Brief blue "marking" glow as the defluffed text fades in, then settles. */
+.defluff-flash {
+  animation: defluff-flash 0.9s ease-out;
+}
+
+@keyframes defluff-flash {
+  0% {
+    background: rgba(10, 102, 194, 0.16);
+    box-shadow: 0 0 0 2px rgba(10, 102, 194, 0.55), 0 6px 22px rgba(10, 102, 194, 0.3);
+  }
+  100% {
+    background: transparent;
+    box-shadow: 0 0 0 0 rgba(10, 102, 194, 0);
+  }
+}
+
+.defluff-badge {
+  display: inline-block;
+  margin-top: 4px;
+  padding: 2px 8px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #0a66c2;
+  background: rgba(10, 102, 194, 0.08);
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+}
+
+.defluff-badge:hover {
+  background: rgba(10, 102, 194, 0.16);
+}

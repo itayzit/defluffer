@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8"/>
+<style>
+  body { font-family: -apple-system, system-ui, sans-serif; background:#f4f2ee; margin:0; padding:24px; }
+  /* Mirror real LinkedIn: side padding lives on the text element, NOT the card. */
+  .card { width:555px; background:#fff; border-radius:8px; box-shadow:0 0 0 1px rgba(0,0,0,.08); padding:12px 0 16px; }
+  .head { font-weight:600; font-size:14px; margin-bottom:8px; padding:0 16px; }
+  #t { font-size:14px; line-height:20px; color:rgba(0,0,0,.9); margin:0; padding:0 16px; }
+
+  /* ---- copied from styles.css ---- */
+  .defluff-summary { border-radius:6px; }
+  .defluff-flash { animation: defluff-flash 0.9s ease-out; }
+  @keyframes defluff-flash {
+    0% { background: rgba(10,102,194,0.16); box-shadow: 0 0 0 2px rgba(10,102,194,0.55), 0 6px 22px rgba(10,102,194,0.3); }
+    100% { background: transparent; box-shadow: 0 0 0 0 rgba(10,102,194,0); }
+  }
+  .defluff-badge { display:inline-block; margin-top:4px; padding:2px 8px; font-size:12px; font-weight:600;
+    color:#0a66c2; background:rgba(10,102,194,.08); border:none; border-radius:12px; cursor:pointer; }
+</style></head>
+<body>
+  <div class="card">
+    <div class="head">Dana Levi · 1st</div>
+    <p id="t">I am beyond thrilled and humbled to share some incredibly exciting news that has been months in the making! 🎉🚀 After an absolutely transformational journey full of growth, late nights, and the most amazing teammates anyone could ask for, I have officially accepted a new role as Senior Product Manager at Acme. None of this would have been possible without my mentors, my family, and everyone who believed in me. Onwards and upwards! 🙏 #blessed #newbeginnings …more</p>
+  </div>
+
+<script>
+// ---- the exact product applySummary (chrome-free) ----
+function applySummary(textEl, summary) {
+  textEl.setAttribute("data-defluffed", "done");
+  const cs = getComputedStyle(textEl);
+  const summaryEl = document.createElement("div");
+  summaryEl.className = "defluff-summary";
+  const line = document.createElement("div");
+  line.className = "defluff-line";
+  line.textContent = summary;
+  line.style.color = cs.color;
+  line.style.fontSize = cs.fontSize;
+  line.style.fontWeight = cs.fontWeight;
+  line.style.lineHeight = cs.lineHeight;
+  line.style.fontFamily = cs.fontFamily;
+  const badge = document.createElement("button");
+  badge.className = "defluff-badge"; badge.type = "button";
+  badge.textContent = "defluffed · show original";
+  summaryEl.style.paddingLeft = cs.paddingLeft;
+  summaryEl.style.paddingRight = cs.paddingRight;
+  summaryEl.appendChild(line); summaryEl.appendChild(badge);
+  textEl.__defluffSummaryEl = summaryEl;
+  const origH = textEl.offsetHeight;
+  textEl.insertAdjacentElement("afterend", summaryEl);
+  const sumH = summaryEl.offsetHeight;
+  textEl.style.overflow = "hidden"; textEl.style.maxHeight = origH + "px"; textEl.style.opacity = "1";
+  summaryEl.style.overflow = "hidden"; summaryEl.style.maxHeight = "0px"; summaryEl.style.opacity = "0";
+  void textEl.offsetHeight;
+  textEl.style.transition = "max-height .45s ease, opacity .3s ease";
+  summaryEl.style.transition = "max-height .45s ease, opacity .45s ease .08s";
+  requestAnimationFrame(() => {
+    textEl.style.maxHeight = "0px"; textEl.style.opacity = "0";
+    summaryEl.style.maxHeight = sumH + "px"; summaryEl.style.opacity = "1";
+    summaryEl.classList.add("defluff-flash");
+  });
+  setTimeout(() => {
+    textEl.style.display = "none"; summaryEl.style.maxHeight = "none";
+    summaryEl.style.transition = ""; summaryEl.classList.remove("defluff-flash");
+  }, 700);
+}
+window.go = () => applySummary(document.getElementById("t"), "Dana got promoted to Senior Product Manager at Acme.");
+window.__ready = true;
+</script>
+</body></html>

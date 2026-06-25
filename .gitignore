@@ -1,0 +1,15 @@
+# build output
+dist/
+
+# the API key file (deleted, but never let it back in)
+k.rtf
+*.key
+
+# large personal screen recordings (real feed — keep out of a public repo)
+*.mov
+*.mp4
+
+# os / tooling
+.DS_Store
+node_modules/
+.wrangler/
