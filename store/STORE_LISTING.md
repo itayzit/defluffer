@@ -54,7 +54,7 @@ workers.dev), which calls an AI model and returns the one-line summary.
 - Not sold or shared with third parties.
 - Not used for purposes unrelated to the single purpose.
 - Not used for creditworthiness/lending.
-- Privacy policy URL: _<host PRIVACY.md and paste the URL here>_
+- Privacy policy URL: https://itayzit.github.io/defluffer/privacy.html
 
 ## Assets checklist
 - [x] Icon 128×128 (`icons/icon128.png`)
