@@ -6,7 +6,7 @@
   "permissions": ["storage"],
   "host_permissions": [
     "https://www.linkedin.com/*",
-    "https://*.workers.dev/*"
+    "https://linkedin-defluffer.defluffer.workers.dev/*"
   ],
   "background": {
     "service_worker": "background.js"

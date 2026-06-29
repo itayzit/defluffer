@@ -36,9 +36,10 @@ only for anti-abuse rate limiting). No personal data.
 The extension runs only on LinkedIn and reads visible feed-post text in order to
 replace it with a summary. It does not run on any other site.
 
-**Host permission — `https://*.workers.dev/*`**
-The extension sends post text to our own Cloudflare Worker endpoint (on
-workers.dev), which calls an AI model and returns the one-line summary.
+**Host permission — `https://linkedin-defluffer.defluffer.workers.dev/*`**
+The extension sends the post text to our single Cloudflare Worker endpoint, which
+calls an AI model and returns the one-line summary. This is the only external
+host the extension contacts.
 
 ## Data usage disclosures (Privacy practices tab)
 - **What user data do you collect?** "Website content" (the text of LinkedIn
