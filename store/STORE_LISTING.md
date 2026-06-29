@@ -12,21 +12,15 @@ Trims long, AI-fluffed LinkedIn posts to one honest line as you scroll. Less flu
 Productivity
 
 ## Detailed description
-LinkedIn is drowning in long, AI-generated humblebrags that take 200 words to
-say one thing. defluffer fixes that.
+Your LinkedIn feed is full of fluff. defluffer cuts it.
 
-As you scroll your feed, it quietly replaces each long post with a single honest
-line — "John graduated from Stanford.", "Michael got promoted to VP." — and
-fades it in right as you reach the post. Everything else stays exactly as it is:
-the author, photo, reactions, and comments are untouched. One click on
-"show original" brings the full post back anytime.
+Long, AI-bloated posts collapse into one honest line as you scroll — "John
+graduated from Stanford.", "Michael got promoted to VP." Everything else stays
+put: author, photo, reactions, comments. Tap "show original" to bring the full
+post back anytime.
 
-Highlights:
-• One-line summaries that match the post's language (Hebrew stays Hebrew).
-• Promoted posts are simply labeled "AD" — no summarizing ads.
-• Smooth fade-in as you scroll; nothing jumps around.
-• No account, no setup, no API key — just install and scroll.
-• Toggle it on/off anytime from the toolbar.
+Summaries match the post's language (Hebrew stays Hebrew). No account, no setup,
+no API key — install and scroll.
 
 Not affiliated with or endorsed by LinkedIn.
 
