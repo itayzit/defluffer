@@ -14,13 +14,11 @@ Productivity
 ## Detailed description
 Your LinkedIn feed is full of fluff. defluffer cuts it.
 
-Long, AI-bloated posts collapse into one honest line as you scroll — "John
-graduated from Stanford.", "Michael got promoted to VP." Everything else stays
-put: author, photo, reactions, comments. Tap "show original" to bring the full
-post back anytime.
+"John graduated from Stanford.", "Michael got promoted to VP." Everything else
+stays put: author, photo, reactions, comments. Tap "show original" to bring the
+full post back anytime.
 
-Summaries match the post's language (Hebrew stays Hebrew). No account, no setup,
-no API key — install and scroll.
+No account, no setup, no API key — install and scroll.
 
 Not affiliated with or endorsed by LinkedIn.
 
