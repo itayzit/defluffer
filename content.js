@@ -6,17 +6,44 @@
 const PROCESSED = "data-defluffed";
 const MIN_CHARS = 180; // don't bother summarizing already-short posts
 
-// Ads never leave the browser — we just slap a label on them. The label is a
-// dry nod to Claude Code's spinner verbs (gerund + ellipsis), aimed at the
-// AI-tooling crowd. Always keeps the word "ad" so it stays honest.
-const AD_LABELS = [
-  "ad · Monetizing…",
-  "ad · Upselling…",
-  "ad · Sponsoring…",
-  "ad · Synergizing…",
-  "ad · Retargeting…",
-  "ad · Converting…",
+// Ads never leave the browser — we just slap an animated label on them: a live
+// nod to Claude Code's spinner (braille frame ticking, gerund cycling), aimed at
+// the AI-tooling crowd. Always keeps the word "ad" so it stays honest.
+const SPIN_FRAMES = ["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"];
+const AD_VERBS = [
+  "Monetizing",
+  "Upselling",
+  "Sponsoring",
+  "Synergizing",
+  "Retargeting",
+  "Converting",
+  "Influencing",
+  "Optimizing",
 ];
+
+// Drive the spinner on an ad's line: braille frame every 80ms, verb every ~3s.
+// Self-cleans the moment LinkedIn recycles the node out of the DOM, so we never
+// leak intervals as the feed virtualizes.
+function startAdSpinner(line) {
+  stopAdSpinner(line);
+  let frame = 0;
+  let ticks = 0;
+  let verb = Math.floor(Math.random() * AD_VERBS.length);
+  const render = () => {
+    if (!line.isConnected) return stopAdSpinner(line);
+    line.textContent = `${SPIN_FRAMES[frame]} ad · ${AD_VERBS[verb]}…`;
+    frame = (frame + 1) % SPIN_FRAMES.length;
+    if (++ticks % 38 === 0) verb = (verb + 1) % AD_VERBS.length;
+  };
+  render();
+  line.__spinId = setInterval(render, 80);
+}
+function stopAdSpinner(line) {
+  if (line && line.__spinId) {
+    clearInterval(line.__spinId);
+    line.__spinId = null;
+  }
+}
 
 // Detect a post written in a non-Latin script we want to pin the output language
 // for. Today that's Hebrew only (the validated bug). Rule: Hebrew letters exist
@@ -126,6 +153,7 @@ function restoreAll() {
     textEl.style.opacity = "";
     textEl.style.overflow = "";
     textEl.style.transition = "";
+    stopAdSpinner(textEl.__defluffSummaryEl?.querySelector(".defluff-line"));
     textEl.__defluffSummaryEl?.remove();
     revealObserver.unobserve(textEl);
     delete textEl.__pendingSummary;
@@ -161,7 +189,7 @@ function maybeDefluff(post) {
     textEl.setAttribute(PROCESSED, "pending");
     textEl.__defluffOriginal = textEl.innerHTML;
     textEl.__defluffIsAd = true;
-    textEl.__pendingSummary = AD_LABELS[Math.floor(Math.random() * AD_LABELS.length)];
+    textEl.__pendingSummary = "ad"; // sentinel; the line is animated, not static
     revealObserver.observe(textEl);
     return;
   }
@@ -231,18 +259,27 @@ function revealSummary(textEl, summary) {
   summaryEl.style.paddingLeft = cs.paddingLeft;
   summaryEl.style.paddingRight = cs.paddingRight;
 
+  // For ads "the fluff" doesn't fit, so the ad just toggles show/hide — and its
+  // line is an animated spinner, not static text.
+  const isAd = textEl.__defluffIsAd;
+
   const line = document.createElement("div");
   line.className = "defluff-line";
-  line.textContent = summary;
+  if (isAd) {
+    // Seed a frame so the height measures right; startAdSpinner takes over once
+    // the node is in the DOM. Force LTR — the label is English even on RTL ads.
+    line.textContent = `${SPIN_FRAMES[0]} ad · ${AD_VERBS[0]}…`;
+    line.style.direction = "ltr";
+    line.style.textAlign = "left";
+  } else {
+    line.textContent = summary;
+  }
   line.style.color = cs.color;
   line.style.fontSize = cs.fontSize;
   line.style.fontWeight = cs.fontWeight;
   line.style.lineHeight = cs.lineHeight;
   line.style.fontFamily = cs.fontFamily;
 
-  // Two pinned strings per badge state. For ads "the fluff" doesn't fit, so the
-  // ad just toggles show/hide.
-  const isAd = textEl.__defluffIsAd;
   const defluffedLabel = isAd ? "show the ad" : "defluffed · show fluff";
   const originalLabel = isAd ? "hide the ad" : "fluff · defluff it";
   const badge = document.createElement("button");
@@ -258,6 +295,7 @@ function revealSummary(textEl, summary) {
   const origH = textEl.offsetHeight;
   textEl.insertAdjacentElement("afterend", summaryEl);
   const sumH = summaryEl.offsetHeight;
+  if (isAd) startAdSpinner(line); // node is in the DOM now — animate the label
 
   // Initial state: original fully shown, summary collapsed + hidden.
   textEl.style.overflow = "hidden";
@@ -303,10 +341,12 @@ function revealSummary(textEl, summary) {
       textEl.style.maxHeight = "none";
       textEl.style.opacity = "1";
       line.style.display = "none";
+      if (isAd) stopAdSpinner(line); // no need to animate a hidden label
     } else {
       // Back to defluffed: hide the original, show the summary line again.
       textEl.style.display = "none";
       line.style.display = "";
+      if (isAd) startAdSpinner(line);
     }
     badge.textContent = showing ? originalLabel : defluffedLabel;
   });
