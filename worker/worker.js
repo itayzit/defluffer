@@ -5,27 +5,15 @@
 // extension. Abuse is bounded by per-install-id + per-IP rate limits (below)
 // plus your hard spend cap on the Google account.
 
-const MODEL = "gemini-2.5-flash-lite";
+import {
+  MODEL,
+  MAX_INPUT_CHARS,
+  SYSTEM_PROMPT,
+  GENERATION_CONFIG,
+  buildUserContent,
+} from "./prompt.mjs";
+
 const ENDPOINT = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent`;
-const MAX_INPUT_CHARS = 2000; // bound per-call cost; LinkedIn posts rarely exceed this
-
-const SYSTEM_PROMPT = `You defluff LinkedIn posts. People write long, self-important, AI-generated posts to say almost nothing. Your job: extract the single real point and state it in plain words.
-
-Rules:
-- Output ONE short line, max ~12 words.
-- Write the summary in the SAME language as the post (Hebrew post → Hebrew summary, Spanish → Spanish, etc.). The examples below are English only to show the style — always match the post's language.
-- Third person, factual, past or present tense.
-- No emojis, no hashtags, no quotes, no hype words ("thrilled", "humbled", "excited", "journey", "game-changer").
-- Use the author's name if it's clear from context; otherwise start with a neutral subject.
-- If the post is genuinely just an announcement, say the announcement. Examples of the target style:
-  "John graduated from Stanford."
-  "Michael got promoted to VP of Sales."
-  "Jonathan won a hackathon with a flood-prediction app."
-  "Sarah is hiring two backend engineers."
-  "Post shares 5 tips for cold email; nothing new."
-- If there is truly no substance, say what it's gesturing at, e.g. "Generic motivational post about resilience."
-
-Return only the line. Nothing else.`;
 
 const CORS = {
   "Access-Control-Allow-Origin": "*",
@@ -68,9 +56,13 @@ export default {
     }
     const text = String(body.text || "").slice(0, MAX_INPUT_CHARS).trim();
     const author = String(body.author || "").slice(0, 80).trim();
+    const lang = String(body.lang || "").slice(0, 20).trim();
     if (!text) return json({ error: "empty" }, 400);
 
-    const userContent = author ? `Author: ${author}\n\nPost:\n${text}` : `Post:\n${text}`;
+    // A detected language is a hard order — it overrides the author name (often
+    // Latin) and the general "match the language" rule. Set only for scripts the
+    // model otherwise drifts away from (today: Hebrew). See prompt.js.
+    const userContent = buildUserContent(text, author, lang);
 
     try {
       const resp = await fetch(`${ENDPOINT}?key=${env.GEMINI_API_KEY}`, {
@@ -79,11 +71,7 @@ export default {
         body: JSON.stringify({
           system_instruction: { parts: [{ text: SYSTEM_PROMPT }] },
           contents: [{ role: "user", parts: [{ text: userContent }] }],
-          generationConfig: {
-            maxOutputTokens: 100,
-            temperature: 0.3,
-            thinkingConfig: { thinkingBudget: 0 }, // no thinking — keep it fast and cheap
-          },
+          generationConfig: GENERATION_CONFIG,
         }),
       });
 

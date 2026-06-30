@@ -9,6 +9,11 @@ k.rtf
 *.mov
 *.mp4
 
+# eval data + outputs — contains REAL people's LinkedIn posts scraped from the
+# feed. Keep OUT of the public repo (privacy). run-eval.mjs is the only asset.
+eval/golden-set.jsonl
+eval/results-*
+
 # os / tooling
 .DS_Store
 node_modules/

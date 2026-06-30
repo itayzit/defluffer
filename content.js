@@ -6,6 +6,29 @@
 const PROCESSED = "data-defluffed";
 const MIN_CHARS = 180; // don't bother summarizing already-short posts
 
+// Ads never leave the browser — we just slap a label on them. The label is a
+// dry nod to Claude Code's spinner verbs (gerund + ellipsis), aimed at the
+// AI-tooling crowd. Always keeps the word "ad" so it stays honest.
+const AD_LABELS = [
+  "ad · Monetizing…",
+  "ad · Upselling…",
+  "ad · Sponsoring…",
+  "ad · Synergizing…",
+  "ad · Retargeting…",
+  "ad · Converting…",
+];
+
+// Detect a post written in a non-Latin script we want to pin the output language
+// for. Today that's Hebrew only (the validated bug). Rule: Hebrew letters exist
+// AND are at least as common as Latin letters — survives a stray English word in
+// a Hebrew post, and a lone Hebrew name in an English post. Returns "" otherwise
+// so the model just matches the language on its own (e.g. English, Spanish).
+function detectLang(text) {
+  const heb = (text.match(/[֐-׿]/g) || []).length;
+  const lat = (text.match(/[A-Za-z]/g) || []).length;
+  return heb > 0 && heb >= lat ? "Hebrew" : "";
+}
+
 let enabled = true;
 
 // After the extension is reloaded/updated, this already-injected script keeps
@@ -132,12 +155,13 @@ function maybeDefluff(post) {
   const textEl = findTextEl(post);
   if (!textEl || textEl.hasAttribute(PROCESSED)) return;
 
-  // Ads don't get summarized — just flagged as "AD" (regardless of length).
+  // Ads don't get summarized or sent anywhere — just slapped with a local,
+  // rotating spinner-verb label (regardless of length).
   if (isPromoted(post, textEl)) {
     textEl.setAttribute(PROCESSED, "pending");
     textEl.__defluffOriginal = textEl.innerHTML;
     textEl.__defluffIsAd = true;
-    textEl.__pendingSummary = "AD";
+    textEl.__pendingSummary = AD_LABELS[Math.floor(Math.random() * AD_LABELS.length)];
     revealObserver.observe(textEl);
     return;
   }
@@ -149,10 +173,11 @@ function maybeDefluff(post) {
   textEl.__defluffOriginal = textEl.innerHTML;
 
   const author = findAuthor(post, textEl);
+  const lang = detectLang(text);
 
   try {
     chrome.runtime.sendMessage(
-      { type: "defluff", text, authorName: author },
+      { type: "defluff", text, authorName: author, lang },
       (res) => {
         if (chrome.runtime.lastError) {
           textEl.removeAttribute(PROCESSED);
@@ -215,11 +240,15 @@ function revealSummary(textEl, summary) {
   line.style.lineHeight = cs.lineHeight;
   line.style.fontFamily = cs.fontFamily;
 
-  const tag = textEl.__defluffIsAd ? "ad" : "defluffed";
+  // Two pinned strings per badge state. For ads "the fluff" doesn't fit, so the
+  // ad just toggles show/hide.
+  const isAd = textEl.__defluffIsAd;
+  const defluffedLabel = isAd ? "show the ad" : "defluffed · show fluff";
+  const originalLabel = isAd ? "hide the ad" : "fluff · defluff it";
   const badge = document.createElement("button");
   badge.className = "defluff-badge";
   badge.type = "button";
-  badge.textContent = tag + " · show original";
+  badge.textContent = defluffedLabel;
 
   summaryEl.appendChild(line);
   summaryEl.appendChild(badge);
@@ -267,17 +296,19 @@ function revealSummary(textEl, summary) {
     showing = !showing;
     textEl.style.transition = "";
     if (showing) {
+      // Show original: bring the post text back (the reveal timeout parked it at
+      // display:none), and hide ONLY the summary line — keep summaryEl in flow so
+      // the badge stays clickable. This is the fix for the old one-way door.
       textEl.style.display = "";
       textEl.style.maxHeight = "none";
       textEl.style.opacity = "1";
-      summaryEl.style.display = "none";
+      line.style.display = "none";
     } else {
+      // Back to defluffed: hide the original, show the summary line again.
       textEl.style.display = "none";
-      summaryEl.style.display = "";
+      line.style.display = "";
     }
-    badge.textContent = showing
-      ? (textEl.__defluffIsAd ? "show ad" : "show summary")
-      : tag + " · show original";
+    badge.textContent = showing ? originalLabel : defluffedLabel;
   });
 }
 
