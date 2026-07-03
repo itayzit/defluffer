@@ -139,9 +139,30 @@ function findAuthor(post, textEl) {
 
 // --- Core ------------------------------------------------------------------
 
+// Only defluff on real feed surfaces — the home feed and single-post pages.
+// The content script is injected on all of linkedin.com, but we must NOT touch
+// text on other pages (invitation manager, messaging, notifications, jobs),
+// where "posts" like a connection-request note would get wrongly summarized.
+// LinkedIn is an SPA, so this is re-checked on every scan, not just at load.
+function onFeedPage() {
+  const p = location.pathname;
+  return (
+    p === "/feed/" ||
+    p === "/feed" ||
+    p.startsWith("/feed/update/") ||
+    p.startsWith("/posts/")
+  );
+}
+
 function scanAll() {
-  if (!contextAlive()) return;
-  findPosts().forEach(maybeDefluff);
+  if (!contextAlive() || !onFeedPage()) return;
+  findPosts().forEach((post) => {
+    // Guard each post so one unexpected DOM shape can't abort the whole sweep
+    // and leave every post after it unprocessed.
+    try {
+      maybeDefluff(post);
+    } catch {}
+  });
 }
 
 function restoreAll() {
@@ -353,15 +374,44 @@ function revealSummary(textEl, summary) {
 }
 
 // --- Watch the feed (infinite scroll) --------------------------------------
+//
+// A plain debounce is the wrong tool here: LinkedIn mutates the feed constantly
+// while you scroll (lazy media, live UI, virtualization), which kept resetting
+// the timer so posts that loaded mid-scroll were never scanned. Instead we
+// THROTTLE — scan on the leading edge, then at most every 500ms — so a steady
+// mutation stream can't starve it. A periodic safety-net scan guarantees any
+// post the observer missed still gets picked up within ~1.5s.
 
 let scanTimer = null;
-const observer = new MutationObserver(() => {
-  if (!contextAlive()) {
-    observer.disconnect(); // stale script from a previous extension version
-    return;
-  }
-  if (!enabled) return;
+let lastScan = 0;
+function scheduleScan() {
+  const since = Date.now() - lastScan;
   clearTimeout(scanTimer);
-  scanTimer = setTimeout(scanAll, 400); // debounce against our own DOM edits
+  if (since >= 500) {
+    lastScan = Date.now();
+    scanAll();
+  } else {
+    scanTimer = setTimeout(() => {
+      lastScan = Date.now();
+      scanAll();
+    }, 500 - since);
+  }
+}
+
+function teardown() {
+  observer.disconnect();
+  clearInterval(safetyNet);
+}
+
+const observer = new MutationObserver(() => {
+  if (!contextAlive()) return teardown(); // stale script from a previous version
+  if (enabled) scheduleScan();
 });
 observer.observe(document.body, { childList: true, subtree: true });
+
+// Safety net: even if the observer misses a mutation batch, sweep the whole
+// feed every 1.5s (cheap — scanAll dedupes on the data-defluffed attribute).
+const safetyNet = setInterval(() => {
+  if (!contextAlive()) return teardown();
+  if (enabled) scanAll();
+}, 1500);
