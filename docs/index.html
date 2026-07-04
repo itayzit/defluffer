@@ -3,21 +3,135 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>defluffer</title>
+<title>defluffer — cut the LinkedIn fluff</title>
+<meta name="description" content="defluffer rewrites long, AI-bloated LinkedIn posts into one honest line — right in your feed, as you scroll. No account, no setup." />
+
+<!-- Open Graph / social share (WhatsApp, iMessage, X, Slack) -->
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="defluffer" />
+<meta property="og:title" content="defluffer — cut the LinkedIn fluff" />
+<meta property="og:description" content="Rewrites long, AI-bloated LinkedIn posts into one honest line, as you scroll. No account, no setup." />
+<meta property="og:url" content="https://itayzit.github.io/defluffer/" />
+<meta property="og:image" content="https://itayzit.github.io/defluffer/og.png" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="defluffer — cut the LinkedIn fluff" />
+<meta name="twitter:description" content="Rewrites long, AI-bloated LinkedIn posts into one honest line, as you scroll." />
+<meta name="twitter:image" content="https://itayzit.github.io/defluffer/og.png" />
+
+<link rel="icon" type="image/png" href="icon.png" />
 <style>
-  :root { color-scheme: light dark; }
-  body { font-family: -apple-system, system-ui, sans-serif; max-width: 560px;
-    margin: 0 auto; padding: 80px 20px; line-height: 1.6; color: #1d2226; }
-  h1 { font-size: 40px; margin: 0; }
-  p { color: #444; font-size: 17px; }
-  a { color: #0a66c2; }
-  @media (prefers-color-scheme: dark) { body { color: #e9e5df; background: #1b1f23; } p { color: #b9b4ad; } }
+  :root {
+    color-scheme: light dark;
+    --bg: #ffffff; --ink: #1d2226; --muted: #5b6b7b;
+    --blue: #0a66c2; --blue-ink: #004182;
+    --card: #ffffff; --line: #e3e2df;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#16191c; --ink:#e9e5df; --muted:#9aa6b1; --card:#1e2226; --line:#2c3237; }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font-family: -apple-system, system-ui, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    line-height: 1.55; -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 620px; margin: 0 auto; padding: 56px 22px 72px; }
+  .brand { display: flex; align-items: center; gap: 10px; margin-bottom: 40px; }
+  .brand img { width: 34px; height: 34px; }
+  .brand b { font-size: 20px; letter-spacing: -0.2px; }
+  h1 { font-size: 42px; line-height: 1.08; letter-spacing: -1px; margin: 0 0 16px; }
+  h1 .accent { color: var(--blue); }
+  .lede { font-size: 19px; color: var(--muted); margin: 0 0 30px; max-width: 30em; }
+  .cta {
+    display: inline-flex; align-items: center; gap: 9px;
+    background: var(--blue); color: #fff; text-decoration: none;
+    font-size: 16px; font-weight: 700; padding: 13px 22px; border-radius: 999px;
+    transition: background .15s ease, transform .15s ease;
+  }
+  .cta:hover { background: var(--blue-ink); transform: translateY(-1px); }
+  .cta svg { width: 18px; height: 18px; }
+  .free { display: block; margin-top: 10px; font-size: 13px; color: var(--muted); }
+
+  /* before / after demo */
+  .demo { margin: 46px 0 8px; }
+  .col-label { font-size: 12px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: .6px; color: var(--muted); margin: 0 0 8px 2px; }
+  .post { background: var(--card); border: 1px solid var(--line); border-radius: 12px;
+    padding: 16px 18px; }
+  .post .who { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+  .post .who .av { width: 34px; height: 34px; border-radius: 50%;
+    background: linear-gradient(135deg,#0a66c2,#63b3ed); flex: none; }
+  .post .who .n { font-size: 14px; font-weight: 600; }
+  .post .who .n span { display: block; font-weight: 400; font-size: 12px; color: var(--muted); }
+  .post .body { font-size: 14.5px; color: var(--ink); }
+  .before .body { color: var(--muted); }
+  .arrow { text-align: center; color: var(--muted); font-size: 22px; margin: 12px 0; }
+  .after .body { font-weight: 500; }
+  .badge { display: inline-block; margin-top: 10px; font-size: 12px; font-weight: 600;
+    color: var(--blue); background: rgba(10,102,194,.10); padding: 3px 10px; border-radius: 999px; }
+
+  .points { list-style: none; padding: 0; margin: 44px 0 0; }
+  .points li { position: relative; padding-left: 26px; margin: 12px 0; font-size: 15.5px; }
+  .points li::before { content: "✂"; position: absolute; left: 0; top: 0; color: var(--blue); }
+  .points li b { font-weight: 600; }
+
+  footer { margin-top: 52px; padding-top: 22px; border-top: 1px solid var(--line);
+    font-size: 13px; color: var(--muted); }
+  footer a { color: var(--blue); text-decoration: none; }
+  footer a:hover { text-decoration: underline; }
 </style>
 </head>
 <body>
-  <h1>defluffer</h1>
-  <p>Trims long, AI-fluffed LinkedIn posts down to one honest line as you scroll.</p>
-  <p><a href="privacy.html">Privacy policy</a></p>
-  <p style="font-size:13px;color:#888;margin-top:48px">Not affiliated with or endorsed by LinkedIn.</p>
+  <main class="wrap">
+    <div class="brand">
+      <img src="icon.png" alt="" />
+      <b>defluffer</b>
+    </div>
+
+    <h1>Your LinkedIn feed is<br /><span class="accent">mostly fluff.</span></h1>
+    <p class="lede">defluffer rewrites long, AI-bloated posts into one honest line —
+      right in your feed, as you scroll.</p>
+
+    <a class="cta" href="https://chromewebstore.google.com/detail/defluffer/ofaajilnnjfcinocgpljpmchpcnbhhln">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 100 20 10 10 0 000-20zm0 6a4 4 0 013.46 6L13 9.6A4 4 0 0112 8zm-8.5 4a8.5 8.5 0 0114.9-5.6l-3 5.2A4 4 0 008 12H3.5zm4.9 3.9A4 4 0 0012 16l2.9 5A8.5 8.5 0 015 15.5l3.4.4zM12 14a2 2 0 110-4 2 2 0 010 4z"/></svg>
+      Add to Chrome
+    </a>
+    <span class="free">Free. No account, no setup, no API key.</span>
+
+    <section class="demo">
+      <div class="before">
+        <p class="col-label">What they wrote</p>
+        <div class="post">
+          <div class="who"><div class="av"></div><div class="n">Adi Finkelstein<span>· 2nd · 3h</span></div></div>
+          <div class="body">Some personal news 🎉 After three sleepless, caffeine-fueled
+          years, I'm beyond thrilled and humbled to share that I've officially graduated
+          — with honors! — from Tel Aviv University. This journey taught me so much about
+          grit, resilience, and showing up every single day. Endless gratitude to my
+          professors, my study group, and my family. Onwards and upwards! 🚀</div>
+        </div>
+      </div>
+      <div class="arrow">↓</div>
+      <div class="after">
+        <p class="col-label">What they meant</p>
+        <div class="post">
+          <div class="who"><div class="av"></div><div class="n">Adi Finkelstein<span>· 2nd · 3h</span></div></div>
+          <div class="body">Adi graduated with honors from Tel Aviv University.</div>
+          <span class="badge">defluffed · show fluff</span>
+        </div>
+      </div>
+    </section>
+
+    <ul class="points">
+      <li>One honest line, in the post's <b>own language</b>.</li>
+      <li>Humblebrags get a dry aside. Ads get a <b>wink</b>, never a summary.</li>
+      <li>Everything else stays — author, photo, reactions, comments.</li>
+    </ul>
+
+    <footer>
+      Not affiliated with or endorsed by LinkedIn. · <a href="privacy.html">Privacy</a>
+    </footer>
+  </main>
 </body>
 </html>
