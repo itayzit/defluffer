@@ -60,6 +60,20 @@
     box-shadow: 0 18px 50px rgba(16,30,54,.13);
   }
 
+  .trust { margin: 46px 0 0; padding: 20px 22px; border: 1px solid var(--line);
+    border-radius: 12px; background: rgba(10,102,194,.04); }
+  .trust h2 { display: flex; align-items: center; gap: 8px; font-size: 15px;
+    margin: 0 0 12px; letter-spacing: -.2px; }
+  .trust h2 svg { width: 16px; height: 16px; color: var(--blue); }
+  .trust ul { list-style: none; margin: 0; padding: 0; }
+  .trust li { position: relative; padding-left: 24px; margin: 8px 0; font-size: 14.5px; }
+  .trust li::before { content: "✓"; position: absolute; left: 0; top: 0;
+    color: var(--blue); font-weight: 700; }
+  .trust li b { font-weight: 600; }
+  .trust a { color: var(--blue); text-decoration: none; font-size: 13.5px;
+    display: inline-block; margin-top: 12px; }
+  .trust a:hover { text-decoration: underline; }
+
   footer { margin-top: 46px; padding-top: 22px; border-top: 1px solid var(--line);
     font-size: 13px; color: var(--muted); }
   footer a { color: var(--blue); text-decoration: none; }
@@ -83,6 +97,19 @@
     <span class="free">Free. No account, no setup, no API key.</span>
 
     <video class="demo-video" src="demo.mp4" autoplay muted loop playsinline></video>
+
+    <section class="trust">
+      <h2>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+        Private by design
+      </h2>
+      <ul>
+        <li><b>Nothing is stored.</b> Posts are summarized on the fly and never saved — no database.</li>
+        <li>No account, no login, no personal data collected.</li>
+        <li>No tracking, no analytics, nothing sold or shared. Ads on your feed are never sent anywhere.</li>
+      </ul>
+      <a href="privacy.html">Read the full privacy policy →</a>
+    </section>
 
     <footer>
       Not affiliated with or endorsed by LinkedIn. · <a href="privacy.html">Privacy</a>
