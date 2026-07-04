@@ -8,6 +8,8 @@ k.rtf
 # large personal screen recordings (real feed — keep out of a public repo)
 *.mov
 *.mp4
+# except the web-optimized demo clip served by GitHub Pages
+!docs/demo.mp4
 
 # eval data + outputs — contains REAL people's LinkedIn posts scraped from the
 # feed. Keep OUT of the public repo (privacy). run-eval.mjs is the only asset.
