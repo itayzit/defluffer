@@ -107,6 +107,33 @@ function cleanText(s) {
   return s.replace(/[…\.]{1,3}\s*more\s*$/i, "").trim();
 }
 
+// Force a truncated post fully open. LinkedIn clamps long text with
+// `-webkit-line-clamp` + an inline "…more" toggle; a synthetic click on that
+// toggle doesn't fire its React handler, so we override the clamp directly
+// (!important beats LinkedIn's class) and hide the now-dead native toggle.
+function showFullText(textEl) {
+  textEl.style.setProperty("-webkit-line-clamp", "unset", "important");
+  textEl.style.setProperty("max-height", "none", "important");
+  textEl.style.setProperty("overflow", "visible", "important");
+  textEl.querySelectorAll("button").forEach((b) => {
+    if (/^…?\s*(see\s+)?(more|less)\s*$/i.test((b.innerText || "").trim())) {
+      b.dataset.defluffHid = "1";
+      b.style.display = "none";
+    }
+  });
+}
+
+// Undo showFullText — return the element to LinkedIn's own clamped state.
+function restoreClamp(textEl) {
+  textEl.style.removeProperty("-webkit-line-clamp");
+  textEl.style.removeProperty("max-height");
+  textEl.style.removeProperty("overflow");
+  textEl.querySelectorAll('button[data-defluff-hid="1"]').forEach((b) => {
+    b.style.display = "";
+    delete b.dataset.defluffHid;
+  });
+}
+
 function findAuthor(post, textEl) {
   // The actor's name shows up in screen-reader strings like
   // "View Mansi Bhamu’s profile" on the avatar image alt or an aria-label.
@@ -174,6 +201,7 @@ function restoreAll() {
     textEl.style.opacity = "";
     textEl.style.overflow = "";
     textEl.style.transition = "";
+    restoreClamp(textEl); // clear any full-text override + un-hide native toggles
     stopAdSpinner(textEl.__defluffSummaryEl?.querySelector(".defluff-line"));
     textEl.__defluffSummaryEl?.remove();
     revealObserver.unobserve(textEl);
@@ -359,8 +387,14 @@ function revealSummary(textEl, summary) {
       // display:none), and hide ONLY the summary line — keep summaryEl in flow so
       // the badge stays clickable. This is the fix for the old one-way door.
       textEl.style.display = "";
-      textEl.style.maxHeight = "none";
       textEl.style.opacity = "1";
+      // Long posts are truncated by LinkedIn with `-webkit-line-clamp` + a native
+      // "…more" toggle *inside* the text element. Hiding the element during the
+      // defluff animation makes LinkedIn strip that toggle, so restoring it would
+      // leave a clamped post with no way to expand. Override the clamp ourselves
+      // (a synthetic click doesn't fire LinkedIn's React handler) and hide the now
+      // dead native toggle so the full post is always readable here.
+      showFullText(textEl);
       line.style.display = "none";
       if (isAd) stopAdSpinner(line); // no need to animate a hidden label
     } else {
