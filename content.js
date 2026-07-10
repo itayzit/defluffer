@@ -107,14 +107,26 @@ function cleanText(s) {
   return s.replace(/[…\.]{1,3}\s*more\s*$/i, "").trim();
 }
 
+// The element(s) that actually carry LinkedIn's line-clamp. Two feed layouts
+// exist: sometimes findTextEl's element IS the clamped `expandable-text-box`
+// span; other times it's a `p[componentkey=feed-commentary]` wrapper whose CHILD
+// span holds the clamp. Override both so the un-clamp never misses.
+function clampTargets(textEl) {
+  const t = [textEl];
+  textEl.querySelectorAll('span[data-testid="expandable-text-box"]').forEach((s) => t.push(s));
+  return t;
+}
+
 // Force a truncated post fully open. LinkedIn clamps long text with
 // `-webkit-line-clamp` + an inline "…more" toggle; a synthetic click on that
 // toggle doesn't fire its React handler, so we override the clamp directly
 // (!important beats LinkedIn's class) and hide the now-dead native toggle.
 function showFullText(textEl) {
-  textEl.style.setProperty("-webkit-line-clamp", "unset", "important");
-  textEl.style.setProperty("max-height", "none", "important");
-  textEl.style.setProperty("overflow", "visible", "important");
+  clampTargets(textEl).forEach((el) => {
+    el.style.setProperty("-webkit-line-clamp", "unset", "important");
+    el.style.setProperty("max-height", "none", "important");
+    el.style.setProperty("overflow", "visible", "important");
+  });
   textEl.querySelectorAll("button").forEach((b) => {
     if (/^…?\s*(see\s+)?(more|less)\s*$/i.test((b.innerText || "").trim())) {
       b.dataset.defluffHid = "1";
@@ -123,11 +135,13 @@ function showFullText(textEl) {
   });
 }
 
-// Undo showFullText — return the element to LinkedIn's own clamped state.
+// Undo showFullText — return the element(s) to LinkedIn's own clamped state.
 function restoreClamp(textEl) {
-  textEl.style.removeProperty("-webkit-line-clamp");
-  textEl.style.removeProperty("max-height");
-  textEl.style.removeProperty("overflow");
+  clampTargets(textEl).forEach((el) => {
+    el.style.removeProperty("-webkit-line-clamp");
+    el.style.removeProperty("max-height");
+    el.style.removeProperty("overflow");
+  });
   textEl.querySelectorAll('button[data-defluff-hid="1"]').forEach((b) => {
     b.style.display = "";
     delete b.dataset.defluffHid;
