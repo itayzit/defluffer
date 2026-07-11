@@ -336,6 +336,14 @@ function revealSummary(textEl, summary) {
     line.style.textAlign = "left";
   } else {
     line.textContent = summary;
+    // A Hebrew summary often embeds Latin runs ("...כ-Senior Product Designer").
+    // Without a declared base direction the line inherits the page's LTR and the
+    // bidi algorithm scrambles the pieces. dir="auto" sets the base direction
+    // from the first strong character (Hebrew → RTL, English → LTR) and lets the
+    // Unicode bidi algorithm place the embedded runs correctly; text-align:start
+    // then aligns to the reading side, matching the original post.
+    line.setAttribute("dir", "auto");
+    line.style.textAlign = "start";
   }
   line.style.color = cs.color;
   line.style.fontSize = cs.fontSize;
