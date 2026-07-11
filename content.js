@@ -222,6 +222,7 @@ function restoreAll() {
     delete textEl.__pendingSummary;
     delete textEl.__defluffIsAd;
     delete textEl.__defluffOrigLen;
+    delete textEl.__defluffLang;
     const badge = textEl.parentElement?.querySelector(".defluff-badge");
     badge?.remove();
     textEl.removeAttribute(PROCESSED);
@@ -267,6 +268,7 @@ function maybeDefluff(post) {
 
   const author = findAuthor(post, textEl);
   const lang = detectLang(text);
+  textEl.__defluffLang = lang; // the summary line's base direction follows the post
 
   try {
     chrome.runtime.sendMessage(
@@ -340,11 +342,12 @@ function revealSummary(textEl, summary) {
     line.textContent = summary;
     // A Hebrew summary often embeds Latin runs ("...כ-Senior Product Designer").
     // Without a declared base direction the line inherits the page's LTR and the
-    // bidi algorithm scrambles the pieces. dir="auto" sets the base direction
-    // from the first strong character (Hebrew → RTL, English → LTR) and lets the
-    // Unicode bidi algorithm place the embedded runs correctly; text-align:start
-    // then aligns to the reading side, matching the original post.
-    line.setAttribute("dir", "auto");
+    // bidi algorithm scrambles the pieces. dir="auto" isn't enough either: it
+    // reads the FIRST strong character, so a Hebrew summary that opens with a
+    // Latin name ("OpenWiki Brains בונה...") still resolves LTR and scrambles.
+    // We know the post's language from the request, so set the base direction
+    // explicitly; text-align:start then aligns to the reading side.
+    line.setAttribute("dir", textEl.__defluffLang === "Hebrew" ? "rtl" : "auto");
     line.style.textAlign = "start";
   }
   line.style.color = cs.color;
@@ -365,9 +368,6 @@ function revealSummary(textEl, summary) {
       defluffedLabel = `defluffed ${pct}% · see for yourself · really?`;
       badgeTier = "defluff-badge--hot";
     } else if (pct >= 90) {
-      defluffedLabel = `defluffed ${pct}% · see for yourself`;
-      badgeTier = "defluff-badge--hot";
-    } else if (pct >= 85) {
       defluffedLabel = `defluffed ${pct}% · show fluff`;
       badgeTier = "defluff-badge--hot";
     } else if (pct >= 65) {
