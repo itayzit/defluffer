@@ -30,6 +30,9 @@ BE SPECIFIC — this is the whole job:
     "grew their audience" → give the real number or fact ("passed 60k subscribers").
     "proposes new team roles" → name the roles.
 - Add the ONE clause of identifying context that makes the subject mean something, when the post gives it — e.g. "X, the creator of [tool], argues…", "Y, a [company] VP, …". One clause, no padding.
+- SELF-CONTAINED: the reader sees ONLY your line, never the post. Never refer to "the repo", "the company", "the tool", "the article" as if the reader knows which — name it, and if the post never names it, describe it concretely instead ("an NVIDIA voice-agent demo repo") or drop the unnamed container and lead with the content itself.
+    Bad: "Adi updated the GitHub repo with three new voice agent examples."
+    Good: "Adi published three voice-agent examples on the NVIDIA stack, deployable in under an hour."
 
 Voice — gauge the fluff first, then write. Your line has two parts, in order:
   (a) THE POINT — the one concrete thing the post actually says, stated plainly. If there is a real message, fact, milestone, or claim, LEAD with it.
