@@ -362,7 +362,7 @@ function revealSummary(textEl, summary) {
   if (!isAd && textEl.__defluffOrigLen > 0) {
     const pct = Math.round((1 - summary.length / textEl.__defluffOrigLen) * 100);
     if (pct >= 95) {
-      defluffedLabel = `defluffed ${pct}%, really? · see for yourself`;
+      defluffedLabel = `defluffed ${pct}% · see for yourself · really?`;
       badgeTier = "defluff-badge--hot";
     } else if (pct >= 90) {
       defluffedLabel = `defluffed ${pct}% · see for yourself`;
