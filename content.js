@@ -221,6 +221,7 @@ function restoreAll() {
     revealObserver.unobserve(textEl);
     delete textEl.__pendingSummary;
     delete textEl.__defluffIsAd;
+    delete textEl.__defluffOrigLen;
     const badge = textEl.parentElement?.querySelector(".defluff-badge");
     badge?.remove();
     textEl.removeAttribute(PROCESSED);
@@ -262,6 +263,7 @@ function maybeDefluff(post) {
 
   textEl.setAttribute(PROCESSED, "pending");
   textEl.__defluffOriginal = textEl.innerHTML;
+  textEl.__defluffOrigLen = text.length; // for the badge's "defluffed NN%" stat
 
   const author = findAuthor(post, textEl);
   const lang = detectLang(text);
@@ -351,10 +353,30 @@ function revealSummary(textEl, summary) {
   line.style.lineHeight = cs.lineHeight;
   line.style.fontFamily = cs.fontFamily;
 
-  const defluffedLabel = isAd ? "show the ad" : "defluffed · show fluff";
+  // How much text the summary cut, as the badge's headline stat. The pill's
+  // color heats up with the number — the redder the pill, the fluffier the
+  // post was. Below 40% the number is more embarrassing than impressive, so
+  // the badge stays plain (and blue).
+  let defluffedLabel = isAd ? "show the ad" : "defluffed · show fluff";
+  let badgeTier = "";
+  if (!isAd && textEl.__defluffOrigLen > 0) {
+    const pct = Math.round((1 - summary.length / textEl.__defluffOrigLen) * 100);
+    if (pct >= 95) {
+      defluffedLabel = `defluffed ${pct}% · see for yourself`;
+      badgeTier = "defluff-badge--hot";
+    } else if (pct >= 85) {
+      defluffedLabel = `defluffed ${pct}% · show fluff`;
+      badgeTier = "defluff-badge--hot";
+    } else if (pct >= 65) {
+      defluffedLabel = `defluffed ${pct}% · show fluff`;
+      badgeTier = "defluff-badge--warm";
+    } else if (pct >= 40) {
+      defluffedLabel = `defluffed ${pct}% · show fluff`;
+    }
+  }
   const originalLabel = isAd ? "hide the ad" : "fluff · defluff it";
   const badge = document.createElement("button");
-  badge.className = "defluff-badge";
+  badge.className = badgeTier ? `defluff-badge ${badgeTier}` : "defluff-badge";
   badge.type = "button";
   badge.textContent = defluffedLabel;
 

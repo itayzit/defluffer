@@ -34,3 +34,20 @@
 .defluff-badge:hover {
   background: rgba(10, 102, 194, 0.16);
 }
+
+/* Heat tiers — the pill warms with the % of text the summary cut. Mid-tone
+   hues + translucent tints so they read on LinkedIn's light AND dark themes. */
+.defluff-badge--warm {
+  color: #b26a05;
+  background: rgba(239, 159, 39, 0.14);
+}
+.defluff-badge--warm:hover {
+  background: rgba(239, 159, 39, 0.26);
+}
+.defluff-badge--hot {
+  color: #c93a38;
+  background: rgba(226, 75, 74, 0.12);
+}
+.defluff-badge--hot:hover {
+  background: rgba(226, 75, 74, 0.24);
+}
