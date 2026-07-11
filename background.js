@@ -30,7 +30,7 @@ async function summarize(text, authorName, lang) {
     }
     const data = await resp.json();
     if (data.error) return { error: data.error };
-    return { summary: (data.summary || "").trim() };
+    return { summary: (data.summary || "").trim(), fluff: data.fluff || "" };
   } catch (e) {
     return { error: "network", detail: String(e) };
   }

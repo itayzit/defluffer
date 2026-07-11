@@ -6,10 +6,27 @@
 export const MODEL = "gemini-2.5-flash-lite";
 export const MAX_INPUT_CHARS = 2000; // bound per-call cost; posts rarely exceed this
 
+// The four fluff grades the model assigns (see the fluff scale in the prompt).
+// Returned alongside the summary; the extension colors its badge by this.
+export const FLUFF_GRADES = ["LOW", "MEDIUM", "HIGH", "PURE"];
+
 export const GENERATION_CONFIG = {
-  maxOutputTokens: 100,
+  maxOutputTokens: 120, // small headroom for the JSON wrapper
   temperature: 0.3,
   thinkingConfig: { thinkingBudget: 0 }, // no thinking — keep it fast and cheap
+  // Structured output: {fluff, summary}. fluff is ordered FIRST so the model
+  // commits to the grade before writing the line — same order as the prompt's
+  // "gauge the fluff first, then write".
+  responseMimeType: "application/json",
+  responseSchema: {
+    type: "OBJECT",
+    properties: {
+      fluff: { type: "STRING", enum: FLUFF_GRADES },
+      summary: { type: "STRING" },
+    },
+    required: ["fluff", "summary"],
+    propertyOrdering: ["fluff", "summary"],
+  },
 };
 
 export const SYSTEM_PROMPT = `You defluff LinkedIn posts. People write long, self-important, AI-generated posts to say almost nothing. Your job: gauge how fluffy the post is, pull out the one real point, and state it plainly — then, the fluffier the post, the more cynical you get about the fluff around it.
@@ -77,7 +94,7 @@ In HEBREW, vary it the same way — do NOT reflexively end with "סבבה". Rota
 
 Keep the rule sacred: if there is ANY real fact, report it FIRST — the cynicism rides on top of the information, it never replaces it.
 
-Return only the line. Nothing else.`;
+Return JSON: {"fluff": "<LOW|MEDIUM|HIGH|PURE — your grade on the fluff scale above>", "summary": "<the line>"}. Grade the fluff first, then write the line to match. Nothing else.`;
 
 // Build the user-turn content. A detected language is a hard order: it overrides
 // the (often Latin) author name and the general "match the language" rule.

@@ -223,6 +223,7 @@ function restoreAll() {
     delete textEl.__defluffIsAd;
     delete textEl.__defluffOrigLen;
     delete textEl.__defluffLang;
+    delete textEl.__defluffFluff;
     const badge = textEl.parentElement?.querySelector(".defluff-badge");
     badge?.remove();
     textEl.removeAttribute(PROCESSED);
@@ -285,6 +286,7 @@ function maybeDefluff(post) {
         // Summary is ready, but hold the reveal until the post is scrolled into
         // view so it fades in right as the reader reaches it.
         textEl.__pendingSummary = res.summary;
+        textEl.__defluffFluff = res.fluff || ""; // model's LOW/MEDIUM/HIGH/PURE grade
         revealObserver.observe(textEl);
       }
     );
@@ -356,25 +358,28 @@ function revealSummary(textEl, summary) {
   line.style.lineHeight = cs.lineHeight;
   line.style.fontFamily = cs.fontFamily;
 
-  // How much text the summary cut, as the badge's headline stat. The pill's
-  // color heats up with the number — the redder the pill, the fluffier the
-  // post was. Below 40% the number is more embarrassing than impressive, so
-  // the badge stays plain (and blue).
+  // Badge = stat + verdict. The NUMBER is how much text the summary cut (an
+  // honest stat, hidden below 40% where it's more embarrassing than
+  // impressive). The COLOR is the model's own fluff grade — a long-but-dense
+  // post compresses a lot yet stays blue; red means the model read it and
+  // found nothing.
   let defluffedLabel = isAd ? "show the ad" : "defluffed · show fluff";
   let badgeTier = "";
-  if (!isAd && textEl.__defluffOrigLen > 0) {
-    const pct = Math.round((1 - summary.length / textEl.__defluffOrigLen) * 100);
-    if (pct >= 95) {
-      defluffedLabel = `defluffed ${pct}% · see for yourself · really?`;
+  if (!isAd) {
+    const pct =
+      textEl.__defluffOrigLen > 0
+        ? Math.round((1 - summary.length / textEl.__defluffOrigLen) * 100)
+        : 0;
+    const stat = pct >= 40 ? `defluffed ${pct}%` : "defluffed";
+    const fluff = textEl.__defluffFluff;
+    if (fluff === "PURE") {
+      defluffedLabel = `${stat} · see for yourself · really?`;
       badgeTier = "defluff-badge--hot";
-    } else if (pct >= 90) {
-      defluffedLabel = `defluffed ${pct}% · show fluff`;
-      badgeTier = "defluff-badge--hot";
-    } else if (pct >= 65) {
-      defluffedLabel = `defluffed ${pct}% · show fluff`;
+    } else if (fluff === "HIGH") {
+      defluffedLabel = `${stat} · show fluff`;
       badgeTier = "defluff-badge--warm";
-    } else if (pct >= 40) {
-      defluffedLabel = `defluffed ${pct}% · show fluff`;
+    } else {
+      defluffedLabel = `${stat} · show fluff`;
     }
   }
   const originalLabel = isAd ? "hide the ad" : "fluff · defluff it";

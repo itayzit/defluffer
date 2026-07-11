@@ -10,6 +10,7 @@ import {
   MAX_INPUT_CHARS,
   SYSTEM_PROMPT,
   GENERATION_CONFIG,
+  FLUFF_GRADES,
   buildUserContent,
 } from "./prompt.mjs";
 
@@ -81,9 +82,21 @@ export default {
       }
 
       const data = await resp.json();
-      const summary = (data?.candidates?.[0]?.content?.parts?.[0]?.text || "").trim();
+      const raw = (data?.candidates?.[0]?.content?.parts?.[0]?.text || "").trim();
+      if (!raw) return json({ error: "no-summary" }, 502);
+      // Structured output: {fluff, summary}. Fall back to treating the whole
+      // text as the summary if the model ever returns bare text.
+      let summary = raw;
+      let fluff = "";
+      try {
+        const parsed = JSON.parse(raw);
+        if (parsed && typeof parsed.summary === "string") {
+          summary = parsed.summary.trim();
+          if (FLUFF_GRADES.includes(parsed.fluff)) fluff = parsed.fluff;
+        }
+      } catch {}
       if (!summary) return json({ error: "no-summary" }, 502);
-      return json({ summary });
+      return json({ summary, fluff });
     } catch (e) {
       return json({ error: "upstream", detail: String(e) }, 502);
     }

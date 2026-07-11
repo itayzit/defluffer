@@ -74,7 +74,7 @@ async function viaWorker(post, lang) {
   });
   const data = await resp.json().catch(() => ({}));
   if (!resp.ok || data.error) return { error: data.error || `http-${resp.status}` };
-  return { summary: (data.summary || "").trim() };
+  return { summary: (data.summary || "").trim(), fluff: data.fluff || "" };
 }
 
 async function viaGemini(post, lang) {
@@ -91,8 +91,16 @@ async function viaGemini(post, lang) {
   });
   const data = await resp.json().catch(() => ({}));
   if (!resp.ok) return { error: `api-${resp.status}: ${JSON.stringify(data).slice(0, 160)}` };
-  const summary = (data?.candidates?.[0]?.content?.parts?.[0]?.text || "").trim();
-  return summary ? { summary } : { error: "no-summary" };
+  const raw = (data?.candidates?.[0]?.content?.parts?.[0]?.text || "").trim();
+  if (!raw) return { error: "no-summary" };
+  // Structured output {fluff, summary}; fall back to bare text (same as worker).
+  try {
+    const parsed = JSON.parse(raw);
+    if (parsed && typeof parsed.summary === "string") {
+      return { summary: parsed.summary.trim(), fluff: parsed.fluff || "" };
+    }
+  } catch {}
+  return { summary: raw, fluff: "" };
 }
 
 const summarize = endpoint ? viaWorker : viaGemini;
@@ -109,10 +117,17 @@ function csvRow(cells) {
 
 // --- run ------------------------------------------------------------------
 
-const posts = readFileSync(join(__dir, "golden-set.jsonl"), "utf8")
+let posts = readFileSync(join(__dir, "golden-set.jsonl"), "utf8")
   .split("\n")
   .filter((l) => l.trim())
   .map((l) => JSON.parse(l));
+
+// --sample N: spot-check on an evenly spread subset instead of the full set.
+const sampleN = Number(arg("--sample")) || 0;
+if (sampleN > 0 && sampleN < posts.length) {
+  const step = posts.length / sampleN;
+  posts = Array.from({ length: sampleN }, (_, i) => posts[Math.floor(i * step)]);
+}
 
 console.log(`Running ${posts.length} posts via ${mode}, concurrency ${CONCURRENCY}…`);
 
@@ -134,16 +149,16 @@ async function worker() {
       process.stdout.write("r"); // retrying
       await sleep(800 * 2 ** attempt + Math.floor(Math.random() * 400));
     }
-    results[i] = { ...post, lang, after: r.summary || `⚠ ${r.error}` };
+    results[i] = { ...post, lang, after: r.summary || `⚠ ${r.error}`, fluff: r.fluff || "" };
     process.stdout.write(r.error ? "x" : ".");
   }
 }
 await Promise.all(Array.from({ length: CONCURRENCY }, worker));
 process.stdout.write("\n");
 
-const header = ["id", "category", "lang", "author", "link", "before", "after", "rating (1-5)", "notes"];
+const header = ["id", "category", "lang", "author", "link", "before", "after", "fluff", "rating (1-5)", "notes"];
 const rows = results.map((r) =>
-  csvRow([r.id, r.category, r.lang || "—", r.author, r.url || "", r.text, r.after, "", ""])
+  csvRow([r.id, r.category, r.lang || "—", r.author, r.url || "", r.text, r.after, r.fluff, "", ""])
 );
 const stamp = new Date().toISOString().replace(/[:.]/g, "-").slice(0, 19);
 const outPath = join(__dir, `results-${stamp}.csv`);
