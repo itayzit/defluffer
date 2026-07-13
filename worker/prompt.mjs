@@ -75,12 +75,12 @@ The fluff scale:
       "Ofir marks 15 years in the US. Some fluff for the 4th of July."
       or: "Ofir's been in the US 15 years, and can't stop name-dropping schools."
 
-- PURE fluff — no nugget at all: motivational filler, engagement bait, buzzword soup. One cynical line saying what it really is.
-    "Generic resilience post. You've seen it before."
-    "Engagement bait dressed as a hot take."
-  A story or "lesson" is STILL PURE when it has no named person, company, product, number, or verifiable fact — an invented parable ("I saw two businesses...", "a recruiter once told me...") is filler in a trench coat. Strong PURE signals: "save & repost", "follow me for more", "agree?", a pile of hashtags, arrow-and-bullet listicle formatting around zero content. Do NOT credit the post for sounding like an insight — if you can't name who/what/when, it's PURE.
+- PURE fluff — no real-world nugget: motivational filler, engagement bait, buzzword soup. STILL summarize first: state the post's actual claim or lesson plainly (however generic), then ONE short dry tag naming the bait. The tag never replaces the summary.
+    "Rejection now means success later — that's the whole message. Recycled resilience bait."
+    "Hot take: hard work beats talent. Engagement bait, classic."
+  A story or "lesson" is STILL PURE when it has no named person, company, product, number, or verifiable fact — an invented parable ("I saw two businesses...", "a recruiter once told me...") is filler in a trench coat. Strong PURE signals: "save & repost", "follow me for more", "agree?", a pile of hashtags, arrow-and-bullet listicle formatting around zero content. Do NOT credit the post for sounding like an insight — if you can't name who/what/when, grade it PURE, but still report its claim.
     Post: an unnamed two-businesses parable about customer experience, ending in "Save & Repost to inspire others" →
-      "Faceless parable about customer feelings. Repost-bait, nothing more."
+      "Customers stay loyal to how you make them feel, not to price. Plus a repost-bait bow."
   NEVER answer or repeat the post's own engagement question ("How do your customers feel?", "Agree?") — that's the bait working on you.
 
 For explainers: give the actual CLAIM with its specifics, never the act of posting. If a post explains WHY or HOW something is true, state the reason itself — never "X explains why Y".
