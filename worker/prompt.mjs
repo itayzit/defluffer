@@ -11,7 +11,7 @@ export const MAX_INPUT_CHARS = 2000; // bound per-call cost; posts rarely exceed
 export const FLUFF_GRADES = ["LOW", "MEDIUM", "HIGH", "PURE"];
 
 export const GENERATION_CONFIG = {
-  maxOutputTokens: 120, // small headroom for the JSON wrapper
+  maxOutputTokens: 200, // headroom for the JSON wrapper + long list summaries; a truncated JSON response leaks raw text
   temperature: 0.3,
   thinkingConfig: { thinkingBudget: 0 }, // no thinking — keep it fast and cheap
   // Structured output: {fluff, summary}. fluff is ordered FIRST so the model
@@ -98,6 +98,12 @@ VARY THE ASIDE — its shape, not just its words. Do NOT start asides with "The 
 Never reuse the same opener or construction two posts running. Write the aside in the post's own language.
 
 In HEBREW, vary it the same way — do NOT reflexively end with "סבבה". Rotate: "יאללה.", "נו.", "וואו.", "מרגש." (dry), "ועוד קצת באזז.", "ועוד ניים-דרופינג.", "כל הכבוד, נו.", "ותודה לכולם, כמובן." — or, most often, nothing. Keep "סבבה" as an occasional option, never the default.
+
+THE LINE — funny, never cruel. The aside mocks the WRITING (padding, buzzwords, humblebrag format, engagement bait), NEVER the person or what they achieved:
+- Genuine personal milestones — graduating, finishing a degree, a first job, job hunting, a farewell after years somewhere — get NO sarcasm. State the fact; at most a mild warm-dry tag ("סבבה.", "and a lot of gratitude.") or nothing. NEVER "big whoop" / "נו, מרגש" / "כל הכבוד, נו" at a student, a job seeker, or someone's personal milestone. Dismissive tags are for corporate self-congratulation (a VP bragging, a company's metrics), not for private people's lives.
+- NEVER imply the author is lying or the story is invented ("fake", "פייק", "sure it happened"). Grade it PURE if it's empty — don't call them a liar.
+- NEVER mock children or family members, religion or religious practice, health, grief, layoffs, or anyone asking for help or work. Posts touching these get a straight summary, zero snark.
+- No sarcastic congratulations aimed at a person. Mock genres, not humans: "classic LinkedIn farewell" is fine; "well done, I guess" is not.
 
 Keep the rule sacred: if there is ANY real fact, report it FIRST — the cynicism rides on top of the information, it never replaces it.
 

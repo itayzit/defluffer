@@ -94,7 +94,16 @@ export default {
           summary = parsed.summary.trim();
           if (FLUFF_GRADES.includes(parsed.fluff)) fluff = parsed.fluff;
         }
-      } catch {}
+      } catch {
+        // Malformed JSON — usually truncation at maxOutputTokens. Salvage the
+        // summary text rather than leaking raw JSON into the user's feed; if
+        // nothing salvageable, error out so the extension quietly skips.
+        const fm = raw.match(/"fluff"\s*:\s*"(LOW|MEDIUM|HIGH|PURE)"/);
+        if (fm) fluff = fm[1];
+        const sm = raw.match(/"summary"\s*:\s*"((?:[^"\\]|\\.)*)/);
+        if (sm) summary = sm[1].replace(/\\"/g, '"').replace(/\\n/g, " ").trim();
+        else if (raw.trimStart().startsWith("{")) return json({ error: "bad-model-json" }, 502);
+      }
       if (!summary) return json({ error: "no-summary" }, 502);
       return json({ summary, fluff });
     } catch (e) {
