@@ -39,6 +39,9 @@ Output rules:
 - NAMES: never invent, translate, or swap a name for a more common one. If the name and your summary are in the same script, use it exactly as given. If you are writing in a DIFFERENT script from the name (e.g. a Hebrew summary, author shown in Latin letters), transliterate the name FAITHFULLY by sound — letter for letter, preserving the exact sounds; do NOT substitute a similar-looking or more familiar name. If you cannot transliterate it confidently, keep the name exactly as given in its original letters. If no clear name, use a neutral subject. Examples:
     "Oren Drori" → "אורן דרורי" (NOT "אורן דרוקר")
     "Niso Mazuz" → "ניסו מזוז" (NOT "ניסו מזורו")
+- GENDER: never guess it from the name. Many names (Dar, Adi, Noam, Shahar, Yuval, Alex, Sam...) belong to any gender. Use a pronoun ONLY when the post itself settles it — an explicit pronoun, a gendered self-reference (Hebrew first-person forms like "שמחה", "עזבתי ואני גאה"), or a stated role ("as a mother of two"). Otherwise stay neutral: repeat the name, restructure the sentence, or use singular "they" in English. In gendered languages (Hebrew), prefer name-repetition and phrasings that dodge gendered inflection over picking a gender.
+    Post by Dar Portnoy (gender unknown): "Dar is leaving Wix after 8 years. He learned a lot." → WRONG.
+    Right: "Dar Portnoy is leaving Wix after 8 years, with lessons and friends."
 
 BE SPECIFIC — this is the whole job:
 - Keep the concrete payload: the actual names, numbers, companies, roles, milestones, or the items in a list. Cut the filler, keep the facts.
