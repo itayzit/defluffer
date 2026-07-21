@@ -386,6 +386,9 @@ function revealSummary(textEl, summary) {
   const badge = document.createElement("button");
   badge.className = badgeTier ? `defluff-badge ${badgeTier}` : "defluff-badge";
   badge.type = "button";
+  // The label is always English. On RTL posts the badge inherits an RTL base
+  // direction and bidi shuffles the trailing "?" to the far side — pin it LTR.
+  badge.setAttribute("dir", "ltr");
   badge.textContent = defluffedLabel;
 
   summaryEl.appendChild(line);
