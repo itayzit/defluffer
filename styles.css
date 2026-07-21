@@ -35,14 +35,14 @@
   background: rgba(10, 102, 194, 0.16);
 }
 
-/* Already-short posts: a quiet green nod, nothing to click. */
+/* Already-short posts: a quiet green nod. Clicking it talks back (easter egg),
+   so it keeps the standard clickable affordance. */
 .defluff-badge--clean {
   color: #1f8a45;
   background: rgba(31, 138, 69, 0.1);
-  cursor: default;
 }
 .defluff-badge--clean:hover {
-  background: rgba(31, 138, 69, 0.1);
+  background: rgba(31, 138, 69, 0.2);
 }
 
 /* Heat tiers — the pill warms with the % of text the summary cut. Mid-tone

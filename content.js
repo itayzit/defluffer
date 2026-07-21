@@ -269,14 +269,29 @@ function maybeDefluff(post) {
   const text = cleanText(textEl.innerText);
   if (text.length < MIN_CHARS) {
     // Already short = already defluffed by its author. Reward it with a local
-    // badge — no network, nothing hidden, nothing to toggle. Skip trivial
-    // posts (a few words) so the feed doesn't fill with badges.
+    // badge — no network, nothing hidden. Skip trivial posts (a few words) so
+    // the feed doesn't fill with badges. Clicking it is an easter egg: each
+    // click escalates a deadpan confirmation, then it settles back down.
     if (text.length >= 40) {
       textEl.setAttribute(PROCESSED, "clean");
-      const clean = document.createElement("span");
+      const clean = document.createElement("button");
+      clean.type = "button";
       clean.className = "defluff-badge defluff-badge--clean";
       clean.setAttribute("dir", "ltr"); // English label, even on RTL posts
       clean.textContent = "fluff not found";
+      const RETORTS = ["we checked twice.", "still nothing.", "not even a buzzword.", "go read it, it's short."];
+      let clicks = 0;
+      let settleTimer = null;
+      clean.addEventListener("click", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        clean.textContent = RETORTS[Math.min(clicks++, RETORTS.length - 1)];
+        clearTimeout(settleTimer);
+        settleTimer = setTimeout(() => {
+          clean.textContent = "fluff not found";
+          clicks = 0;
+        }, 2500);
+      });
       textEl.insertAdjacentElement("afterend", clean);
     }
     return;
