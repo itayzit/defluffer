@@ -261,7 +261,20 @@ function maybeDefluff(post) {
   }
 
   const text = cleanText(textEl.innerText);
-  if (text.length < MIN_CHARS) return;
+  if (text.length < MIN_CHARS) {
+    // Already short = already defluffed by its author. Reward it with a local
+    // badge — no network, nothing hidden, nothing to toggle. Skip trivial
+    // posts (a few words) so the feed doesn't fill with badges.
+    if (text.length >= 40) {
+      textEl.setAttribute(PROCESSED, "clean");
+      const clean = document.createElement("span");
+      clean.className = "defluff-badge defluff-badge--clean";
+      clean.setAttribute("dir", "ltr"); // English label, even on RTL posts
+      clean.textContent = "fluff not found";
+      textEl.insertAdjacentElement("afterend", clean);
+    }
+    return;
+  }
 
   textEl.setAttribute(PROCESSED, "pending");
   textEl.__defluffOriginal = textEl.innerHTML;
