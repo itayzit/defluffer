@@ -88,7 +88,13 @@ chrome.storage.onChanged.addListener((changes) => {
 // component framework with hashed class names, so we anchor on stable
 // attributes (role, data-testid, componentkey) instead of CSS classes.
 function findPosts() {
-  return document.querySelectorAll('div[role="listitem"]');
+  // Two coexisting LinkedIn renderers: the new obfuscated one wraps posts in
+  // div[role="listitem"]; some pages (e.g. certain /posts/ permalinks) still
+  // serve the legacy renderer where a post is div.feed-shared-update-v2 with
+  // role="article". The class+role pair keeps comments/articles out.
+  return document.querySelectorAll(
+    'div[role="listitem"], div.feed-shared-update-v2[role="article"]'
+  );
 }
 
 // The element holding the actual post text inside a card.
