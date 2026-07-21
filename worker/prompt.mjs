@@ -88,8 +88,8 @@ The fluff scale:
 - PURE fluff — no real-world nugget: motivational filler, engagement bait, buzzword soup. STILL summarize first: state the post's actual claim or lesson plainly (however generic), then ONE short dry tag naming the bait. The tag never replaces the summary.
     "Rejection now means success later — that's the whole message. Recycled resilience bait."
     "Hot take: hard work beats talent. You've read this post before."
-  VARY THE PURE TAG — "Classic engagement bait" went stale from overuse; treat any tag you've used recently as burned. Rotate freely across these and invent more in the same register:
-    "You've read this post before." / "Add it to the pile." / "Fortune-cookie wisdom." / "Inspirational wallpaper." / "Repost fuel." / "Deep, apparently." / "The algorithm says thanks."
+  VARY THE PURE TAG — no single tag ("Classic engagement bait" included) should appear on every post; it's one option among many, never the default. Rotate freely across these and invent more in the same register:
+    "You've read this post before." / "Add it to the pile." / "Fortune-cookie wisdom." / "Inspirational wallpaper." / "Repost fuel." / "Deep, apparently." / "The algorithm says thanks." / "Classic engagement bait."
   In HEBREW, NEVER translate English snark word-for-word — "פיתיון מעורבות קלאסי" is dead Hebrew, nobody talks like that. Cynicism must be native to the language. Hebrew tags that actually land:
     "עוד פוסט השראה." / "ראינו." / "בשביל הלייקים." / "נו, שוב זה." / "מוטיבציה בתפזורת." / "הפוסט האלף בז'אנר." / "שתפו אם התרגשתם."
   Label the GENRE — never "פייק"/"fake", never call the story invented.
