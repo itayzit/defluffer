@@ -285,10 +285,15 @@ function maybeDefluff(post) {
       clean.addEventListener("click", (e) => {
         e.preventDefault();
         e.stopPropagation();
-        clean.textContent = RETORTS[Math.min(clicks++, RETORTS.length - 1)];
+        const i = Math.min(clicks++, RETORTS.length - 1);
+        clean.textContent = RETORTS[i];
+        // Last retort drops the pill background — the visual cue that the
+        // bit is over and there's nothing further to click for.
+        clean.classList.toggle("defluff-badge--spent", i === RETORTS.length - 1);
         clearTimeout(settleTimer);
         settleTimer = setTimeout(() => {
           clean.textContent = "fluff not found";
+          clean.classList.remove("defluff-badge--spent");
           clicks = 0;
         }, 2500);
       });

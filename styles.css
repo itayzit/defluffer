@@ -45,6 +45,13 @@
   background: rgba(31, 138, 69, 0.2);
 }
 
+/* Final retort: pill background gone — the bit is over, nothing more to click. */
+.defluff-badge--spent,
+.defluff-badge--spent:hover {
+  background: transparent;
+  cursor: default;
+}
+
 /* Heat tiers — the pill warms with the % of text the summary cut. Mid-tone
    hues + translucent tints so they read on LinkedIn's light AND dark themes. */
 .defluff-badge--warm {
