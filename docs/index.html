@@ -60,6 +60,24 @@
     box-shadow: 0 18px 50px rgba(16,30,54,.13);
   }
 
+  .examples { margin: 46px 0 0; }
+  .examples h2 { font-size: 15px; letter-spacing: -.2px; margin: 0 0 14px; }
+  .ex { border: 1px solid var(--line); border-radius: 12px; padding: 16px 18px; margin-bottom: 14px; }
+  .ex-before { font-size: 13.5px; color: var(--muted); margin: 0 0 10px; }
+  .ex-before s { text-decoration: none; opacity: .75; }
+  .ex-after { font-size: 15px; margin: 0 0 10px; }
+  .badge { display: inline-block; font-size: 12px; font-weight: 700; padding: 2px 10px; border-radius: 12px;
+    color: #0a66c2; background: rgba(10, 102, 194, .08); }
+  .badge--amber { color: #b26a05; background: rgba(239, 159, 39, .14); }
+  .badge--red { color: #c93a38; background: rgba(226, 75, 74, .12); }
+  .badge--green { color: #1f8a45; background: rgba(31, 138, 69, .1); }
+  @media (prefers-color-scheme: dark) {
+    .badge { color: #70b5f9; background: rgba(112, 181, 249, .13); }
+    .badge--amber { color: #e8a33d; background: rgba(232, 163, 61, .14); }
+    .badge--red { color: #f08784; background: rgba(240, 135, 132, .13); }
+    .badge--green { color: #5cc98a; background: rgba(92, 201, 138, .13); }
+  }
+
   .trust { margin: 46px 0 0; padding: 20px 22px; border: 1px solid var(--line);
     border-radius: 12px; background: rgba(10,102,194,.04); }
   .trust h2 { display: flex; align-items: center; gap: 8px; font-size: 15px;
@@ -97,6 +115,34 @@
     <span class="free">Free. No account, no setup, no API key.</span>
 
     <video class="demo-video" src="demo.mp4" autoplay muted loop playsinline></video>
+
+    <section class="examples">
+      <h2>Some examples</h2>
+
+      <div class="ex">
+        <p class="ex-before"><s>"I don't usually post about myself, but today is special. After an incredible journey of growth, learning, and pushing beyond my comfort zone, I'm beyond thrilled and deeply humbled to finally share that…"</s></p>
+        <p class="ex-after">Mark got promoted to VP of Sales... big whoop.</p>
+        <span class="badge">defluffed 87% · show fluff</span>
+      </div>
+
+      <div class="ex">
+        <p class="ex-before"><s>"Three days. 200 conversations. Countless insights. AI Summit Vegas was nothing short of transformational. Huge thanks to the brilliant minds who shared the stage with me — you know who you are…"</s></p>
+        <p class="ex-after">Yuval attended an AI summit in Vegas. Plus a lot of name-dropping.</p>
+        <span class="badge badge--amber">defluffed 91% · show fluff</span>
+      </div>
+
+      <div class="ex">
+        <p class="ex-before"><s>"A janitor once told me something I'll never forget. 'Son,' he said, 'success isn't about talent. It's about showing up.' I think about that every single day. Agree? ♻️ Repost to inspire someone…"</s></p>
+        <p class="ex-after">Success is showing up every day — that's the whole message. You've read this post before.</p>
+        <span class="badge badge--red">defluffed 96% · see for yourself · really?</span>
+      </div>
+
+      <div class="ex">
+        <p class="ex-before"><s>"We're hiring two senior backend engineers in Tel Aviv. DM me."</s></p>
+        <p class="ex-after">Short posts stay untouched — they get credit instead.</p>
+        <span class="badge badge--green">fluff not found</span>
+      </div>
+    </section>
 
     <section class="trust">
       <h2>
