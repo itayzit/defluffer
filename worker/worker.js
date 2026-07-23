@@ -11,6 +11,8 @@ import {
   SYSTEM_PROMPT,
   GENERATION_CONFIG,
   FLUFF_GRADES,
+  HAIKU_PROMPT,
+  HAIKU_CONFIG,
   buildUserContent,
 } from "./prompt.mjs";
 
@@ -58,6 +60,7 @@ export default {
     const text = String(body.text || "").slice(0, MAX_INPUT_CHARS).trim();
     const author = String(body.author || "").slice(0, 80).trim();
     const lang = String(body.lang || "").slice(0, 20).trim();
+    const haiku = body.mode === "haiku"; // easter egg: three lines instead of one
     if (!text) return json({ error: "empty" }, 400);
 
     // A detected language is a hard order — it overrides the author name (often
@@ -70,9 +73,9 @@ export default {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({
-          system_instruction: { parts: [{ text: SYSTEM_PROMPT }] },
+          system_instruction: { parts: [{ text: haiku ? HAIKU_PROMPT : SYSTEM_PROMPT }] },
           contents: [{ role: "user", parts: [{ text: userContent }] }],
-          generationConfig: GENERATION_CONFIG,
+          generationConfig: haiku ? HAIKU_CONFIG : GENERATION_CONFIG,
         }),
       });
 
@@ -84,6 +87,8 @@ export default {
       const data = await resp.json();
       const raw = (data?.candidates?.[0]?.content?.parts?.[0]?.text || "").trim();
       if (!raw) return json({ error: "no-summary" }, 502);
+      // Haiku mode is plain text — no JSON envelope, no grade.
+      if (haiku) return json({ summary: raw });
       // Structured output: {fluff, summary}. Fall back to treating the whole
       // text as the summary if the model ever returns bare text.
       let summary = raw;

@@ -309,6 +309,7 @@ function maybeDefluff(post) {
   textEl.setAttribute(PROCESSED, "pending");
   textEl.__defluffOriginal = textEl.innerHTML;
   textEl.__defluffOrigLen = text.length; // for the badge's "defluffed NN%" stat
+  textEl.__defluffText = text; // kept for the haiku easter egg
 
   const author = findAuthor(post, textEl);
   const lang = detectLang(text);
@@ -436,6 +437,59 @@ function revealSummary(textEl, summary) {
 
   summaryEl.appendChild(line);
   summaryEl.appendChild(badge);
+
+  // Easter egg: haiku-ify. A barely-there button that rewrites the summary as
+  // a deadpan haiku (one worker call, cached; toggles back). Not for ads.
+  let haikuBtn = null;
+  if (!isAd && textEl.__defluffText) {
+    haikuBtn = document.createElement("button");
+    haikuBtn.type = "button";
+    haikuBtn.className = "defluff-haiku";
+    haikuBtn.setAttribute("dir", "ltr");
+    haikuBtn.textContent = "haiku-ify";
+    summaryEl.appendChild(haikuBtn);
+    let haikuText = null;
+    let poetry = false;
+    const summaryText = summary;
+    const showHaiku = () => {
+      line.textContent = haikuText;
+      line.style.whiteSpace = "pre-line";
+      line.style.fontStyle = "italic";
+      haikuBtn.textContent = "enough poetry";
+    };
+    haikuBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      if (poetry) {
+        poetry = false;
+        line.textContent = summaryText;
+        line.style.whiteSpace = "";
+        line.style.fontStyle = "";
+        haikuBtn.textContent = "haiku-ify";
+        return;
+      }
+      poetry = true;
+      if (haikuText) return showHaiku();
+      haikuBtn.textContent = "composing…";
+      try {
+        chrome.runtime.sendMessage(
+          { type: "defluff", text: textEl.__defluffText, authorName: "", lang: textEl.__defluffLang, mode: "haiku" },
+          (res) => {
+            if (chrome.runtime.lastError || !res || res.error || !res.summary) {
+              poetry = false;
+              haikuBtn.textContent = "haiku-ify";
+              return;
+            }
+            haikuText = res.summary;
+            if (poetry) showHaiku(); // user may have toggled back while waiting
+          }
+        );
+      } catch {
+        poetry = false;
+        haikuBtn.textContent = "haiku-ify";
+      }
+    });
+  }
   textEl.__defluffSummaryEl = summaryEl;
 
   // Measure both heights before animating.
@@ -494,11 +548,13 @@ function revealSummary(textEl, summary) {
       // dead native toggle so the full post is always readable here.
       showFullText(textEl);
       line.style.display = "none";
+      if (haikuBtn) haikuBtn.style.display = "none"; // no poetry over the original
       if (isAd) stopAdSpinner(line); // no need to animate a hidden label
     } else {
       // Back to defluffed: hide the original, show the summary line again.
       textEl.style.display = "none";
       line.style.display = "";
+      if (haikuBtn) haikuBtn.style.display = "";
       if (isAd) startAdSpinner(line);
     }
     badge.textContent = showing ? originalLabel : defluffedLabel;

@@ -13,7 +13,7 @@ async function getInstallId() {
   return id;
 }
 
-async function summarize(text, authorName, lang) {
+async function summarize(text, authorName, lang, mode) {
   const installId = await getInstallId();
   try {
     const resp = await fetch(WORKER_URL, {
@@ -22,7 +22,7 @@ async function summarize(text, authorName, lang) {
         "content-type": "application/json",
         "X-Install-Id": installId,
       },
-      body: JSON.stringify({ text, author: authorName, lang }),
+      body: JSON.stringify({ text, author: authorName, lang, mode: mode || "" }),
     });
 
     if (!resp.ok) {
@@ -38,7 +38,7 @@ async function summarize(text, authorName, lang) {
 
 chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
   if (msg?.type === "defluff") {
-    summarize(msg.text, msg.authorName, msg.lang).then(sendResponse);
+    summarize(msg.text, msg.authorName, msg.lang, msg.mode).then(sendResponse);
     return true; // keep the message channel open for the async response
   }
 });

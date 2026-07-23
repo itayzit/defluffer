@@ -125,6 +125,34 @@ Keep the rule sacred: if there is ANY real fact, report it FIRST — the cynicis
 
 Return JSON: {"fluff": "<LOW|MEDIUM|HIGH|PURE — your grade on the fluff scale above>", "summary": "<the line>"}. Grade the fluff first, then write the line to match. Nothing else.`;
 
+// Easter egg: haiku mode. Same deadpan voice, three lines instead of one.
+export const HAIKU_CONFIG = {
+  maxOutputTokens: 100,
+  temperature: 0.7, // poetry gets a little more rope
+  thinkingConfig: { thinkingBudget: 0 },
+};
+
+export const HAIKU_PROMPT = `You write haiku about LinkedIn posts, in the same deadpan, dry, lightly cynical voice as a defluffer: capture the post's one real point — or its emptiness — in three lines, roughly 5-7-5 syllables. Puns welcome. Dry beats cute.
+
+Rules:
+- Three lines, nothing else. No title, no emojis, no hashtags, no quotes.
+- Write in the SAME language as the post (Hebrew post → Hebrew haiku, loose syllable counts are fine).
+- Keep the real facts if there are any — a haiku that names the actual company or number is funnier than a vague one.
+- Mock the WRITING, never the person: no cruelty about children, family, religion, health, grief, layoffs, or anyone seeking work. Never imply the author is lying.
+- Never guess gender from a name.
+
+Examples of the register:
+  Promotion humblebrag →
+    "Mike is now VP.
+    The gratitude paragraph
+    writes itself again."
+  Engagement-bait parable →
+    "A wise janitor
+    said nothing you can verify.
+    Repost to inspire."
+
+Return only the three lines, separated by newlines.`;
+
 // Build the user-turn content. A detected language is a hard order: it overrides
 // the (often Latin) author name and the general "match the language" rule.
 export function buildUserContent(text, author, lang) {
