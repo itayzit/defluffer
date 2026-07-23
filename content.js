@@ -596,11 +596,25 @@ function scanComposer() {
     wrap.appendChild(out);
     anchor.insertAdjacentElement("afterend", wrap);
 
+    // After a verdict the button hides — it has nothing more to say about this
+    // draft. Editing the text brings it back (the verdict may be stale).
+    let checkedText = null;
+    editor.addEventListener("input", () => {
+      if (checkedText !== null && cleanText(editor.innerText) !== checkedText) {
+        btn.style.display = "";
+        checkedText = null;
+      }
+    });
+
     btn.addEventListener("click", () => {
       const text = cleanText(editor.innerText);
       if (text.length < 40) return composeResult(out, "tooShort");
       // Same threshold as the feed: short enough not to summarize = clean.
-      if (text.length < MIN_CHARS) return composeResult(out, "clean");
+      if (text.length < MIN_CHARS) {
+        checkedText = text;
+        btn.style.display = "none";
+        return composeResult(out, "clean");
+      }
       btn.disabled = true;
       btn.textContent = "checking…";
       const lang = detectLang(text);
@@ -612,8 +626,10 @@ function scanComposer() {
         chrome.runtime.sendMessage({ type: "defluff", text, authorName: "", lang }, (res) => {
           done();
           if (chrome.runtime.lastError || !res || res.error || !res.summary) {
-            return composeResult(out, "error");
+            return composeResult(out, "error"); // button stays — retry is the next move
           }
+          checkedText = text;
+          btn.style.display = "none";
           const pct = Math.round((1 - res.summary.length / text.length) * 100);
           composeResult(out, "result", { summary: res.summary, fluff: res.fluff, pct, lang });
         });
