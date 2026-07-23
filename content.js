@@ -234,6 +234,10 @@ function restoreAll() {
     badge?.remove();
     textEl.removeAttribute(PROCESSED);
   });
+  // Composer fluff-check UI lives inside shadow roots — clear it there too.
+  document.querySelectorAll('div[class*="theme--"]').forEach((host) => {
+    host.shadowRoot?.querySelectorAll(".dfc-wrap").forEach((n) => n.remove());
+  });
 }
 
 // A post is an ad if a "Promoted" / "Sponsored" label sits in its header (where
@@ -501,6 +505,126 @@ function revealSummary(textEl, summary) {
   });
 }
 
+// --- Composer fluff check ("am I the fluff?") -------------------------------
+//
+// LinkedIn's post composer lives inside an OPEN shadow root on a div.theme--*
+// host (a Quill editor: div.ql-editor[contenteditable]). Our stylesheet can't
+// reach into shadow DOM, so the UI carries its own <style> per root. The check
+// is user-invoked: one click = one worker call (same endpoint as the feed),
+// and the result shows exactly what defluffer readers would see.
+
+const COMPOSE_STYLE = `
+  .dfc-wrap { margin: 6px 12px 4px; font-family: -apple-system, system-ui, sans-serif; }
+  .dfc-btn { display: inline-block; font-size: 12px; font-weight: 600; padding: 3px 11px;
+    border: none; border-radius: 12px; cursor: pointer;
+    color: #0a66c2; background: rgba(10, 102, 194, .08); }
+  .dfc-btn:hover { background: rgba(10, 102, 194, .16); }
+  .dfc-btn:disabled { opacity: .6; cursor: default; }
+  .dfc-out { margin-top: 6px; font-size: 13px; line-height: 1.45; }
+  .dfc-pill { display: inline-block; font-size: 12px; font-weight: 700; padding: 2px 10px;
+    border-radius: 12px; }
+  .dfc-blue { color: #0a66c2; background: rgba(10, 102, 194, .08); }
+  .dfc-warm { color: #b26a05; background: rgba(239, 159, 39, .14); }
+  .dfc-hot { color: #c93a38; background: rgba(226, 75, 74, .12); }
+  .dfc-clean { color: #1f8a45; background: rgba(31, 138, 69, .1); }
+  .dfc-muted { color: #808080; font-size: 12px; }
+  .dfc-line { margin: 3px 0 0; }
+`;
+
+function composeResult(out, kind, data) {
+  out.textContent = "";
+  const pill = document.createElement("span");
+  pill.className = "dfc-pill";
+  if (kind === "tooShort") {
+    out.className = "dfc-out dfc-muted";
+    out.textContent = "write a bit more first.";
+    return;
+  }
+  out.className = "dfc-out";
+  if (kind === "error") {
+    out.className = "dfc-out dfc-muted";
+    out.textContent = "couldn't check — try again.";
+    return;
+  }
+  if (kind === "clean") {
+    pill.classList.add("dfc-clean");
+    pill.textContent = "fluff not found · post it";
+    out.appendChild(pill);
+    return;
+  }
+  const grade = data.fluff || "";
+  pill.classList.add(grade === "PURE" ? "dfc-hot" : grade === "HIGH" ? "dfc-warm" : "dfc-blue");
+  let label = `defluffed ${data.pct}%`;
+  if (grade) label += ` · ${grade.toLowerCase()} fluff`;
+  if (grade === "PURE") label += " · really?";
+  pill.textContent = label;
+  out.appendChild(pill);
+  const cap = document.createElement("div");
+  cap.className = "dfc-muted dfc-line";
+  cap.textContent = "readers with defluffer will see:";
+  out.appendChild(cap);
+  const line = document.createElement("div");
+  line.className = "dfc-line";
+  line.setAttribute("dir", data.lang === "Hebrew" ? "rtl" : "auto");
+  line.textContent = data.summary;
+  out.appendChild(line);
+}
+
+function scanComposer() {
+  document.querySelectorAll('div[class*="theme--"]').forEach((host) => {
+    const sr = host.shadowRoot;
+    if (!sr || sr.querySelector(".dfc-wrap")) return;
+    const editor = sr.querySelector('div.ql-editor[contenteditable="true"]');
+    if (!editor) return;
+    const anchor = sr.querySelector(".editor-content.ql-container");
+    if (!anchor) return;
+
+    const style = document.createElement("style");
+    style.textContent = COMPOSE_STYLE;
+    sr.appendChild(style);
+
+    const wrap = document.createElement("div");
+    wrap.className = "dfc-wrap";
+    wrap.setAttribute("dir", "ltr");
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "dfc-btn";
+    btn.textContent = "check my fluff";
+    const out = document.createElement("div");
+    out.className = "dfc-out";
+    wrap.appendChild(btn);
+    wrap.appendChild(out);
+    anchor.insertAdjacentElement("afterend", wrap);
+
+    btn.addEventListener("click", () => {
+      const text = cleanText(editor.innerText);
+      if (text.length < 40) return composeResult(out, "tooShort");
+      // Same threshold as the feed: short enough not to summarize = clean.
+      if (text.length < MIN_CHARS) return composeResult(out, "clean");
+      btn.disabled = true;
+      btn.textContent = "checking…";
+      const lang = detectLang(text);
+      const done = () => {
+        btn.disabled = false;
+        btn.textContent = "check my fluff";
+      };
+      try {
+        chrome.runtime.sendMessage({ type: "defluff", text, authorName: "", lang }, (res) => {
+          done();
+          if (chrome.runtime.lastError || !res || res.error || !res.summary) {
+            return composeResult(out, "error");
+          }
+          const pct = Math.round((1 - res.summary.length / text.length) * 100);
+          composeResult(out, "result", { summary: res.summary, fluff: res.fluff, pct, lang });
+        });
+      } catch {
+        done();
+        composeResult(out, "error");
+      }
+    });
+  });
+}
+
 // --- Watch the feed (infinite scroll) --------------------------------------
 //
 // A plain debounce is the wrong tool here: LinkedIn mutates the feed constantly
@@ -518,10 +642,12 @@ function scheduleScan() {
   if (since >= 500) {
     lastScan = Date.now();
     scanAll();
+    scanComposer();
   } else {
     scanTimer = setTimeout(() => {
       lastScan = Date.now();
       scanAll();
+      scanComposer();
     }, 500 - since);
   }
 }
@@ -541,5 +667,8 @@ observer.observe(document.body, { childList: true, subtree: true });
 // feed every 1.5s (cheap — scanAll dedupes on the data-defluffed attribute).
 const safetyNet = setInterval(() => {
   if (!contextAlive()) return teardown();
-  if (enabled) scanAll();
+  if (enabled) {
+    scanAll();
+    scanComposer(); // the composer modal can open on any linkedin.com page
+  }
 }, 1500);

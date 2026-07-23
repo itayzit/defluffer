@@ -1,7 +1,7 @@
 {
   "manifest_version": 2,
   "name": "defluffer",
-  "version": "1.1.6",
+  "version": "1.2.0",
   "description": "Trims long, AI-fluffed LinkedIn posts down to one honest line as you scroll. 'John graduated from X.' Done.",
   "permissions": [
     "storage",
@@ -9,14 +9,22 @@
     "https://linkedin-defluffer.defluffer.workers.dev/*"
   ],
   "background": {
-    "scripts": ["background.js"],
+    "scripts": [
+      "background.js"
+    ],
     "persistent": false
   },
   "content_scripts": [
     {
-      "matches": ["https://www.linkedin.com/*"],
-      "js": ["content.js"],
-      "css": ["styles.css"],
+      "matches": [
+        "https://www.linkedin.com/*"
+      ],
+      "js": [
+        "content.js"
+      ],
+      "css": [
+        "styles.css"
+      ],
       "run_at": "document_idle"
     }
   ],
@@ -39,7 +47,9 @@
       "id": "defluffer@itayzit.github.io",
       "strict_min_version": "128.0",
       "data_collection_permissions": {
-        "required": ["websiteContent"]
+        "required": [
+          "websiteContent"
+        ]
       }
     }
   }
