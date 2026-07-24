@@ -619,7 +619,7 @@ function composeResult(out, kind, data) {
   }
   if (kind === "clean") {
     pill.classList.add("dfc-clean");
-    pill.textContent = "fluff not found · post it";
+    pill.textContent = "no fluff · post it";
     out.appendChild(pill);
     return;
   }
