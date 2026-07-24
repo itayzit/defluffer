@@ -200,7 +200,9 @@ function onFeedPage() {
     p.startsWith("/posts/") ||
     // Profile pages (incl. /in/<user>/recent-activity/): users asked for their
     // activity feeds defluffed too. Messaging/invitations/jobs stay excluded.
-    p.startsWith("/in/")
+    p.startsWith("/in/") ||
+    // When searching for posts
+    p.startsWith("/search/results/content/")
   );
 }
 
