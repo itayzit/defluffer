@@ -709,7 +709,7 @@ function scanComposer() {
     const btn = document.createElement("button");
     btn.type = "button";
     btn.className = "dfc-btn";
-    btn.textContent = "check my fluff";
+    btn.textContent = "check fluff";
     const out = document.createElement("div");
     out.className = "dfc-out";
     wrap.appendChild(btn);
@@ -740,7 +740,7 @@ function scanComposer() {
       const lang = detectLang(text);
       const done = () => {
         btn.disabled = false;
-        btn.textContent = "check my fluff";
+        btn.textContent = "check fluff";
       };
       try {
         chrome.runtime.sendMessage({ type: "defluff", text, authorName: "", lang }, (res) => {
