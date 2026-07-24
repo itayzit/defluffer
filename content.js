@@ -585,6 +585,16 @@ const COMPOSE_STYLE = `
   .dfc-clean { color: #1f8a45; background: rgba(31, 138, 69, .1); }
   .dfc-muted { color: #808080; font-size: 12px; }
   .dfc-line { margin: 3px 0 0; }
+  .dfc-card { margin-top: 5px; padding: 10px 12px; border: 1px solid rgba(128, 128, 128, .3);
+    border-radius: 10px; color: inherit; }
+  .dfc-card-head { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+  .dfc-ava { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; flex: none; }
+  .dfc-ava-fallback { width: 32px; height: 32px; border-radius: 50%; flex: none;
+    background: rgba(10, 102, 194, .15); color: #0a66c2; font-weight: 700; font-size: 14px;
+    display: flex; align-items: center; justify-content: center; }
+  .dfc-name { font-size: 13px; font-weight: 600; line-height: 1.2; }
+  .dfc-meta { font-size: 11px; color: #808080; }
+  .dfc-postline { font-size: 14px; line-height: 1.45; margin: 0 0 6px; }
 `;
 
 function composeResult(out, kind, data) {
@@ -608,22 +618,58 @@ function composeResult(out, kind, data) {
     out.appendChild(pill);
     return;
   }
-  const grade = data.fluff || "";
-  pill.classList.add(grade === "PURE" ? "dfc-hot" : grade === "HIGH" ? "dfc-warm" : "dfc-blue");
-  let label = `defluffed ${data.pct}%`;
-  if (grade) label += ` · ${grade.toLowerCase()} fluff`;
-  if (grade === "PURE") label += " · really?";
-  pill.textContent = label;
-  out.appendChild(pill);
+  // Render the verdict as a miniature feed post — the reader's-eye view,
+  // avatar and all, with the badge exactly as the feed would label it.
   const cap = document.createElement("div");
-  cap.className = "dfc-muted dfc-line";
+  cap.className = "dfc-muted";
   cap.textContent = "readers with defluffer will see:";
   out.appendChild(cap);
+
+  const card = document.createElement("div");
+  card.className = "dfc-card";
+
+  const head = document.createElement("div");
+  head.className = "dfc-card-head";
+  if (data.avatar) {
+    const img = document.createElement("img");
+    img.className = "dfc-ava";
+    img.src = data.avatar;
+    img.alt = "";
+    head.appendChild(img);
+  } else {
+    const fb = document.createElement("div");
+    fb.className = "dfc-ava-fallback";
+    fb.textContent = (data.name || "?").trim().charAt(0).toUpperCase();
+    head.appendChild(fb);
+  }
+  const who = document.createElement("div");
+  const nm = document.createElement("div");
+  nm.className = "dfc-name";
+  nm.textContent = data.name || "You";
+  const meta = document.createElement("div");
+  meta.className = "dfc-meta";
+  meta.textContent = "Just now · defluffed";
+  who.appendChild(nm);
+  who.appendChild(meta);
+  head.appendChild(who);
+  card.appendChild(head);
+
   const line = document.createElement("div");
-  line.className = "dfc-line";
+  line.className = "dfc-postline";
   line.setAttribute("dir", data.lang === "Hebrew" ? "rtl" : "auto");
   line.textContent = data.summary;
-  out.appendChild(line);
+  card.appendChild(line);
+
+  // Badge labeled exactly like the feed badge would be.
+  const grade = data.fluff || "";
+  pill.classList.add(grade === "PURE" ? "dfc-hot" : grade === "HIGH" ? "dfc-warm" : "dfc-blue");
+  const stat = data.pct >= 40 ? `defluffed ${data.pct}%` : "defluffed";
+  pill.textContent =
+    grade === "PURE" ? `${stat} · see for yourself · really?` : `${stat} · show fluff`;
+  pill.setAttribute("dir", "ltr");
+  card.appendChild(pill);
+
+  out.appendChild(card);
 }
 
 function scanComposer() {
@@ -638,6 +684,19 @@ function scanComposer() {
     const style = document.createElement("style");
     style.textContent = COMPOSE_STYLE;
     sr.appendChild(style);
+
+    // The poster's identity for the preview card: the composer header shows
+    // the author (avatar img + "Name / Post to Anyone" button).
+    let avatar = "";
+    let name = "";
+    const headBtn = [...sr.querySelectorAll("button")].find((b) =>
+      /post to/i.test(b.innerText || "")
+    );
+    if (headBtn) {
+      name = (headBtn.innerText || "").split("\n")[0].trim();
+      avatar = headBtn.querySelector("img")?.src || "";
+    }
+    if (!avatar) avatar = sr.querySelector('img[class*="avatar"], img[alt*="photo" i]')?.src || "";
 
     const wrap = document.createElement("div");
     wrap.className = "dfc-wrap";
@@ -687,7 +746,7 @@ function scanComposer() {
           checkedText = text;
           btn.style.display = "none";
           const pct = Math.round((1 - res.summary.length / text.length) * 100);
-          composeResult(out, "result", { summary: res.summary, fluff: res.fluff, pct, lang });
+          composeResult(out, "result", { summary: res.summary, fluff: res.fluff, pct, lang, avatar, name });
         });
       } catch {
         done();
