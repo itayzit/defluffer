@@ -197,7 +197,10 @@ function onFeedPage() {
     p === "/feed/" ||
     p === "/feed" ||
     p.startsWith("/feed/update/") ||
-    p.startsWith("/posts/")
+    p.startsWith("/posts/") ||
+    // Profile pages (incl. /in/<user>/recent-activity/): users asked for their
+    // activity feeds defluffed too. Messaging/invitations/jobs stay excluded.
+    p.startsWith("/in/")
   );
 }
 
@@ -446,7 +449,7 @@ function revealSummary(textEl, summary) {
     haikuBtn.type = "button";
     haikuBtn.className = "defluff-haiku";
     haikuBtn.setAttribute("dir", "ltr");
-    haikuBtn.textContent = "haiku-ify";
+    haikuBtn.textContent = "haiku";
     summaryEl.appendChild(haikuBtn);
     let haikuText = null;
     let poetry = false;
@@ -456,6 +459,7 @@ function revealSummary(textEl, summary) {
       line.style.whiteSpace = "pre-line";
       line.style.fontStyle = "italic";
       haikuBtn.textContent = "enough poetry";
+      haikuBtn.classList.add("defluff-haiku--on"); // stays visible while poetry is up
     };
     haikuBtn.addEventListener("click", (e) => {
       e.preventDefault();
@@ -465,7 +469,8 @@ function revealSummary(textEl, summary) {
         line.textContent = summaryText;
         line.style.whiteSpace = "";
         line.style.fontStyle = "";
-        haikuBtn.textContent = "haiku-ify";
+        haikuBtn.textContent = "haiku";
+        haikuBtn.classList.remove("defluff-haiku--on");
         return;
       }
       poetry = true;
@@ -477,7 +482,7 @@ function revealSummary(textEl, summary) {
           (res) => {
             if (chrome.runtime.lastError || !res || res.error || !res.summary) {
               poetry = false;
-              haikuBtn.textContent = "haiku-ify";
+              haikuBtn.textContent = "haiku";
               return;
             }
             haikuText = res.summary;
@@ -486,7 +491,7 @@ function revealSummary(textEl, summary) {
         );
       } catch {
         poetry = false;
-        haikuBtn.textContent = "haiku-ify";
+        haikuBtn.textContent = "haiku";
       }
     });
   }

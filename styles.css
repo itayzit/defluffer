@@ -35,7 +35,8 @@
   background: rgba(10, 102, 194, 0.16);
 }
 
-/* Haiku easter egg: barely-there next to the badge — found, not advertised. */
+/* Haiku easter egg: invisible until the mouse wanders over the summary —
+   found, never advertised. Stays visible while poetry is active. */
 .defluff-haiku {
   display: inline-block;
   margin: 4px 0 0 8px;
@@ -47,11 +48,19 @@
   border: none;
   border-radius: 10px;
   cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.25s ease;
+}
+.defluff-summary:hover .defluff-haiku,
+.defluff-haiku:focus-visible {
   opacity: 0.75;
 }
 .defluff-haiku:hover {
   opacity: 1;
   background: rgba(128, 128, 128, 0.12);
+}
+.defluff-haiku--on {
+  opacity: 0.85;
 }
 
 /* Already-short posts: a quiet green nod. Clicking it talks back (easter egg),
