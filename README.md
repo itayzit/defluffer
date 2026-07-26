@@ -1,6 +1,10 @@
+<img src="icons/icon128.png" alt="defluffer logo" width="80" align="left" />
+
 # defluffer
 
 **Install: [Chrome](https://chromewebstore.google.com/detail/defluffer/ofaajilnnjfcinocgpljpmchpcnbhhln) · [Firefox](https://addons.mozilla.org/en-US/firefox/addon/defluffer/)** · [Landing page](https://itayzit.github.io/defluffer/)
+
+<br clear="left" />
 
 Replaces long, AI-fluffed LinkedIn posts with one honest line, as you scroll.
 "John graduated from Stanford." Done.
