@@ -208,13 +208,45 @@ function onFeedPage() {
 
 function scanAll() {
   if (!contextAlive() || !onFeedPage()) return;
+  let blind = 0;
   findPosts().forEach((post) => {
     // Guard each post so one unexpected DOM shape can't abort the whole sweep
     // and leave every post after it unprocessed.
     try {
+      // Selector-drift canary: a container with real text that findTextEl
+      // can't parse means LinkedIn moved the furniture.
+      if (!findTextEl(post) && (post.innerText || "").length > 300) blind++;
       maybeDefluff(post);
     } catch {}
   });
+  // Three unparseable posts and not a single success on the page = we're blind.
+  // Say so instead of dying silently ("looks fake, does nothing" is the review
+  // that kills extensions), and ping home so the fix ships before the reviews.
+  if (blind >= 3 && !document.querySelector(`[${PROCESSED}]`)) reportBreakage("feed");
+}
+
+let breakageReported = false;
+function reportBreakage(surface) {
+  if (breakageReported) return;
+  breakageReported = true;
+  try {
+    chrome.runtime.sendMessage({ type: "breakage", surface });
+  } catch {}
+  const toast = document.createElement("div");
+  toast.className = "defluff-toast";
+  toast.setAttribute("dir", "ltr");
+  const msg = document.createElement("span");
+  msg.textContent = "defluffer can't read the feed — LinkedIn changed something. A fix usually ships within a day.";
+  const close = document.createElement("button");
+  close.type = "button";
+  close.className = "defluff-toast-close";
+  close.setAttribute("aria-label", "Dismiss");
+  close.textContent = "×";
+  close.addEventListener("click", () => toast.remove());
+  toast.appendChild(msg);
+  toast.appendChild(close);
+  document.body.appendChild(toast);
+  setTimeout(() => toast.remove(), 15000);
 }
 
 function restoreAll() {
@@ -686,7 +718,7 @@ function scanComposer() {
     const editor = sr.querySelector('div.ql-editor[contenteditable="true"]');
     if (!editor) return;
     const anchor = sr.querySelector(".editor-content.ql-container");
-    if (!anchor) return;
+    if (!anchor) return reportBreakage("composer"); // editor found, mount point gone
 
     const style = document.createElement("style");
     style.textContent = COMPOSE_STYLE;

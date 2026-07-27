@@ -35,6 +35,46 @@
   background: rgba(10, 102, 194, 0.16);
 }
 
+/* Honest-failure toast: shown once when LinkedIn's DOM drifts and we go blind. */
+.defluff-toast {
+  position: fixed;
+  bottom: 20px;
+  left: 20px;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  max-width: 340px;
+  padding: 12px 14px;
+  font-family: -apple-system, system-ui, sans-serif;
+  font-size: 13px;
+  line-height: 1.4;
+  color: #1d2226;
+  background: #fff;
+  border: 1px solid #e0dfdc;
+  border-radius: 8px;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.18);
+}
+.defluff-toast::before {
+  content: "cannot defluff";
+  flex: none;
+  align-self: flex-start;
+  padding: 2px 10px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #c93a38;
+  background: rgba(226, 75, 74, 0.12);
+  border-radius: 12px;
+}
+.defluff-toast-close {
+  border: none;
+  background: transparent;
+  font-size: 16px;
+  color: #808080;
+  cursor: pointer;
+  padding: 0 2px;
+}
+
 /* Haiku easter egg: invisible until the mouse wanders over the summary —
    found, never advertised. Stays visible while poetry is active. */
 .defluff-haiku {

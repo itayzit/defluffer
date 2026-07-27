@@ -41,4 +41,20 @@ chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
     summarize(msg.text, msg.authorName, msg.lang, msg.mode).then(sendResponse);
     return true; // keep the message channel open for the async response
   }
+  if (msg?.type === "breakage") {
+    // Selector-drift canary: anonymous, content-free ping ({surface, version}
+    // only) so drift shows up on the worker's /health before the reviews do.
+    // Also mark the extension icon so the user sees something is off.
+    const action = chrome.action || chrome.browserAction; // MV3 / Firefox MV2
+    action?.setBadgeText({ text: "!" });
+    action?.setBadgeBackgroundColor?.({ color: "#c93a38" });
+    fetch(`${WORKER_URL}/breakage`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        surface: msg.surface || "feed",
+        version: chrome.runtime.getManifest().version,
+      }),
+    }).catch(() => {});
+  }
 });

@@ -32,10 +32,45 @@ function json(obj, status = 200) {
   });
 }
 
+// --- selector-drift canary --------------------------------------------------
+// The extension pings POST /breakage (no content, no ids: {surface, version})
+// when it can see posts but can't parse them — the "LinkedIn changed the DOM"
+// signal. Counts land in KV by day; GET /health shows the last 7 days.
+
+async function recordBreakage(env, body) {
+  if (!env.BREAKAGE) return; // namespace not configured — drop silently
+  const surface = ["feed", "composer"].includes(body.surface) ? body.surface : "other";
+  const day = new Date().toISOString().slice(0, 10);
+  const key = `breakage:${day}`;
+  const cur = (await env.BREAKAGE.get(key, "json")) || {};
+  cur[surface] = (cur[surface] || 0) + 1;
+  cur.lastVersion = String(body.version || "").slice(0, 20);
+  await env.BREAKAGE.put(key, JSON.stringify(cur), { expirationTtl: 60 * 60 * 24 * 30 });
+}
+
+async function healthReport(env) {
+  const days = {};
+  if (env.BREAKAGE) {
+    for (let i = 0; i < 7; i++) {
+      const d = new Date(Date.now() - i * 864e5).toISOString().slice(0, 10);
+      const v = await env.BREAKAGE.get(`breakage:${d}`, "json");
+      if (v) days[d] = v;
+    }
+  }
+  return { ok: true, breakage: days, note: env.BREAKAGE ? undefined : "KV not configured" };
+}
+
 export default {
   async fetch(request, env) {
     if (request.method === "OPTIONS") return new Response(null, { status: 204, headers: CORS });
+    const path = new URL(request.url).pathname;
+    if (request.method === "GET" && path === "/health") return json(await healthReport(env));
     if (request.method !== "POST") return json({ error: "method" }, 405);
+    if (path === "/breakage") {
+      const b = await request.json().catch(() => ({}));
+      await recordBreakage(env, b);
+      return json({ ok: true });
+    }
 
     // --- abuse limits: per install id, then per IP (soft, fixed 60s window) ---
     const installId = (request.headers.get("X-Install-Id") || "anon").slice(0, 64);

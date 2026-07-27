@@ -16,3 +16,11 @@ name = "RL_IP"
 type = "ratelimit"
 namespace_id = "2002"
 simple = { limit = 80, period = 60 }
+
+# Breakage counter (selector drift canary). Create the namespace once with:
+#   npx wrangler kv namespace create BREAKAGE
+# then paste the printed id below and redeploy. The worker runs fine without
+# it — pings are just dropped.
+# [[kv_namespaces]]
+# binding = "BREAKAGE"
+# id = "PASTE_ID_HERE"
