@@ -204,7 +204,9 @@ const POSTS = [
     name:"Northwind Cloud", color:"#0a66c2", initials:"NC", verified:true, deg:"", promoted:true,
     headline:"Enterprise infrastructure, reimagined for the AI era", time:"",
     original:`Your data stack wasn't built for agents. Northwind unifies governance, lineage, and observability in one control plane — so your teams ship AI features without waiting on six approvals. See why 4,000+ engineering orgs made the switch this year.<span class="more"> …more</span>`,
-    summary:"", pill:"", tier:"ad", ad:true,
+    // Seed a full-width spinner frame so the collapsed height is measured with
+    // the label present — an empty pill measures short and clips the spinner.
+    summary:"", pill:"⠋ ad · Monetizing…", tier:"ad", ad:true,
     react:[["#0a66c2","👍"]], reactN:"128", comments:"12 comments",
     media:"linear-gradient(135deg,#0b2b4a,#0a66c2 65%,#5aa9e6)"
   },
@@ -336,6 +338,20 @@ const ring = document.getElementById("ring");
 const clamp = (x,a,b)=>Math.max(a,Math.min(b,x));
 const smooth = x => { x = clamp(x,0,1); return x*x*(3-2*x); };
 const smoother = x => { x = clamp(x,0,1); return x*x*x*(x*(x*6-15)+10); };
+
+// Scroll travel: trapezoid velocity — brief ease-in, constant speed, gentle
+// settle. S-curves (smooth/smoother) creep for the first second, which reads
+// as a stalled video; a real scroll gets up to speed and stays there.
+function travel(x){
+  x = clamp(x,0,1);
+  const A = 0.10, B = 0.85;                 // ramp-up ends / ramp-down starts
+  const area = A/2 + (B-A) + (1-B)/2;       // normalizer
+  let s;
+  if (x < A) s = (x*x)/(2*A);
+  else if (x < B) s = A/2 + (x-A);
+  else { const u = (x-B)/(1-B); s = A/2 + (B-A) + (1-B)*(u - u*u/2); }
+  return s/area;
+}
 // progress of t through [a,b]
 const seg = (t,a,b)=> clamp((t-a)/(b-a), 0, 1);
 
@@ -365,7 +381,7 @@ function setCollapse(i, c){
 // --- timeline ---------------------------------------------------------------
 // t is overall progress in [0,1]. Scenes, in order:
 //   scroll+defluff → haiku on the PURE post → composer fluff check
-const T_SCROLL_A = 0.05;  // dwell, post 0 expanded
+const T_SCROLL_A = 0.035; // ≈0.8s dwell on post 0, moving by ~1s
 const T_SCROLL_B = 0.50;  // scrolling + collapsing finishes
 const T_HAIKU_A  = 0.54;  // cursor moves to the summary
 const T_HAIKU_B  = 0.60;  // click
@@ -388,7 +404,7 @@ window.renderFrame = function(frame, total){
   const N = POSTS.length;
 
   // ---- scroll + collapse ----
-  const p = smoother(seg(t, T_SCROLL_A, T_SCROLL_B));
+  const p = travel(seg(t, T_SCROLL_A, T_SCROLL_B));
   const front = p * (N - 1 + TAIL);
   for (let i=0;i<N;i++) setCollapse(i, clamp((front - i)/BAND, 0, 1));
 
@@ -405,8 +421,8 @@ window.renderFrame = function(frame, total){
   // ---- ad spinner (deterministic: derived from frame, never from a clock) ----
   const adIdx = POSTS.findIndex(x=>x.ad);
   if (adIdx >= 0){
-    const tick = Math.floor(frame/5);
-    const verb = VERBS[Math.floor(frame/90) % VERBS.length];
+    const tick = Math.floor(frame/3);   // ~10 frames/s, close to the app's 80ms
+    const verb = VERBS[Math.floor(frame/90) % VERBS.length]; // new verb every ~3s
     M[adIdx].pill.textContent = `${SPIN[tick % SPIN.length]} ad · ${verb}…`;
   }
 
