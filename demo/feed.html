@@ -193,10 +193,10 @@
 <script>
 const POSTS = [
   {
-    name:"Lior Meitar", color:"#3b6ea5", initials:"LM", verified:true, deg:"1st",
+    name:"Marcus Reyes", color:"#3b6ea5", initials:"MR", verified:true, deg:"1st",
     headline:"Chief of Staff | Columbia Business School MBA | Ex-Naval Officer", time:"1w",
     original:`Excited to share that I'm joining <a>Venn</a> as Chief of Staff! 🎉 Venn is building agentic AI for multifamily real estate — a space that is massively underserved by modern software. After months of conversations, I knew this was the team I wanted to bet on. Endless gratitude to everyone who supported me on this journey. More to come 🙏<span class="more"> …more</span>`,
-    summary:"Lior joined Venn as Chief of Staff, building agentic AI for multifamily real estate.",
+    summary:"Marcus joined Venn as Chief of Staff, building agentic AI for multifamily real estate.",
     pill:"defluffed 84% · show fluff", tier:"",
     react:[["#0a66c2","👍"],["#e0457b","❤️"],["#f5bb5c","👏"]], reactN:"370", comments:"73 comments"
   },
@@ -228,11 +228,21 @@ const POSTS = [
     react:[["#e0457b","❤️"],["#0a66c2","👍"],["#f5bb5c","👏"]], reactN:"3,412", comments:"210 comments"
   },
   {
-    name:"Gad Shimron", color:"#c0563f", initials:"GS", verified:false, deg:"2nd",
+    name:"Adam Fielding", color:"#c0563f", initials:"AF", verified:false, deg:"2nd",
     headline:"Product @ Stealth | Endurance athlete | Writing about tools", time:"5d",
-    original:`We're hiring two senior backend engineers in Tel Aviv. Rust, Postgres, no on-call. DM me.`,
+    original:`We're hiring two senior backend engineers in Berlin. Rust, Postgres, no on-call. DM me.`,
     summary:"", pill:"fluff not found", tier:"clean", clean:true,
     react:[["#0a66c2","👍"],["#e0457b","❤️"]], reactN:"89", comments:"34 comments"
+  },
+  {
+    // Tail post: the camera never travels to it, it just keeps the viewport
+    // full once the scroll settles on the post above.
+    name:"Priya Raghavan", color:"#4a6b8a", initials:"PR", verified:true, deg:"2nd",
+    headline:"Engineering Manager @ Datadog | Previously Stripe", time:"6d",
+    original:`Six months ago our deploy pipeline took 41 minutes and everyone dreaded Fridays. Today it takes 6. No new tooling, no rewrite, no heroics — just three boring decisions we should have made two years earlier. Sharing the full breakdown because I wish someone had shared theirs with us 👇<span class="more"> …more</span>`,
+    summary:"Priya's team cut deploys from 41 minutes to 6, with no new tooling.",
+    pill:"defluffed 79% · show fluff", tier:"",
+    react:[["#0a66c2","👍"],["#f5bb5c","👏"]], reactN:"642", comments:"57 comments"
   }
 ];
 
@@ -393,9 +403,13 @@ const T_CHECK    = 0.91;  // click "check fluff"
 const T_RESULT   = 0.95;  // preview card in
 
 const HAIKU_IDX = POSTS.findIndex(p=>p.haiku);
-const BAND = 0.62;  // travel that collapses one post
-const TAIL = 1.5;   // extra travel so the last post lands
-const FOCUS = 0.30; // active post sits at 30% of the viewport
+const BAND = 0.62;   // travel that collapses one post
+const TAIL = 2.3;    // extra travel: collapses the tail post and settles
+const FOCUS = 0.30;  // active post sits at 30% of the viewport
+// The camera walks every post EXCEPT the last one — that one exists only to
+// fill the space below the final resting position, so the feed never bottoms
+// out into empty background.
+const N_CAM = POSTS.length - 1;
 
 function place(el, x, y){ el.style.transform = `translate(${x}px, ${y}px)`; }
 
@@ -405,11 +419,11 @@ window.renderFrame = function(frame, total){
 
   // ---- scroll + collapse ----
   const p = travel(seg(t, T_SCROLL_A, T_SCROLL_B));
-  const front = p * (N - 1 + TAIL);
+  const front = p * (N_CAM - 1 + TAIL);
   for (let i=0;i<N;i++) setCollapse(i, clamp((front - i)/BAND, 0, 1));
 
-  const lo = clamp(Math.floor(front), 0, N-1);
-  const hi = Math.min(N-1, lo+1);
+  const lo = clamp(Math.floor(front), 0, N_CAM-1);
+  const hi = Math.min(N_CAM-1, lo+1);
   const f = clamp(front - lo, 0, 1);
   const anchor = M[lo].card.offsetTop*(1-f) + M[hi].card.offsetTop*f;
   // after the scroll scene, drift back so the PURE post is centred for the haiku
