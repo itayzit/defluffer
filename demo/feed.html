@@ -10,7 +10,7 @@
     -webkit-font-smoothing: antialiased;
     color: rgba(0,0,0,.9);
   }
-  body { overflow: hidden; } /* we drive scroll via transform on .feed */
+  body { overflow: hidden; } /* scroll is driven via transform on .feed */
 
   /* ---- top nav ---- */
   .nav {
@@ -30,9 +30,7 @@
   .navicon svg { width: 22px; height: 22px; fill: #66666b; }
   .navicon.active { color: rgba(0,0,0,.9); }
   .navicon.active svg { fill: rgba(0,0,0,.9); }
-  .navicon.active::after { content:""; position:absolute; }
-  .navme { width: 24px; height: 24px; border-radius: 50%; background: #c9d1d8;
-    background-size: cover; }
+  .navme { width: 24px; height: 24px; border-radius: 50%; background: #c9d1d8; }
 
   /* ---- feed column ---- */
   .stage { position: fixed; inset: 52px 0 0 0; overflow: hidden; }
@@ -44,8 +42,7 @@
     position: relative; overflow: hidden;
   }
   .card .glow {
-    position: absolute; inset: 0; border-radius: 8px; pointer-events: none;
-    box-shadow: 0 0 0 2px rgba(10,102,194,0); transition: none; opacity: 0;
+    position: absolute; inset: 0; border-radius: 8px; pointer-events: none; opacity: 0;
   }
   .chead { display: flex; align-items: flex-start; padding: 12px 16px 0 16px; gap: 8px; }
   .avatar { width: 48px; height: 48px; border-radius: 50%; flex: none;
@@ -60,6 +57,7 @@
   .time { font-size: 12px; color: rgba(0,0,0,.6); display: flex; align-items: center; gap: 3px; margin-top: 1px; }
   .time svg { width: 12px; height: 12px; fill: rgba(0,0,0,.6); }
   .dots { color: rgba(0,0,0,.6); font-size: 20px; line-height: 12px; padding: 0 4px; }
+  .promoted { font-size: 12px; color: rgba(0,0,0,.6); }
 
   .body { padding: 8px 16px 0 16px; }
   .original { font-size: 14px; line-height: 20px; color: rgba(0,0,0,.9); overflow: hidden; }
@@ -67,13 +65,22 @@
   .more { color: rgba(0,0,0,.6); }
 
   .summary { overflow: hidden; }
-  .sumtext { font-size: 14px; line-height: 20px; color: rgba(0,0,0,.9); padding-top: 0; }
-  .pill { display: inline-flex; align-items: center; gap: 6px; margin-top: 6px;
-    padding: 3px 10px; font-size: 12px; font-weight: 600; color: #0a66c2;
-    background: rgba(10,102,194,.1); border-radius: 14px; }
-  .pill .spark { width: 12px; height: 12px; fill: #0a66c2; }
+  .sumtext { font-size: 14px; line-height: 20px; color: rgba(0,0,0,.9); white-space: pre-line; }
+  .sumtext.poem { font-style: italic; }
 
-  .media { margin-top: 12px; height: 280px; background-size: cover; background-position: center; }
+  /* badges — same values the extension ships in styles.css */
+  .pillrow { display: flex; align-items: center; margin-top: 6px; }
+  .pill { display: inline-block; padding: 2px 8px; font-size: 12px; font-weight: 600;
+    border-radius: 12px; color: #0a66c2; background: rgba(10,102,194,.08); }
+  .pill.warm { color: #b26a05; background: rgba(239,159,39,.14); }
+  .pill.hot  { color: #c93a38; background: rgba(226,75,74,.12); }
+  .pill.clean{ color: #1f8a45; background: rgba(31,138,69,.1); }
+  .pill.ad   { font-variant-numeric: tabular-nums; }
+  .haiku { margin-left: 8px; padding: 2px 6px; font-size: 11px; font-weight: 500;
+    color: #949494; border-radius: 10px; opacity: 0; }
+  .haiku.hot { background: rgba(128,128,128,.12); }
+
+  .media { margin-top: 12px; height: 260px; background-size: cover; background-position: center; }
 
   .counts { display: flex; align-items: center; gap: 6px; padding: 8px 16px 6px;
     font-size: 12px; color: rgba(0,0,0,.6); }
@@ -86,6 +93,41 @@
   .act { flex: 1; display: flex; align-items: center; justify-content: center; gap: 6px;
     padding: 8px 4px; color: rgba(0,0,0,.6); font-size: 14px; font-weight: 600; border-radius: 4px; }
   .act svg { width: 20px; height: 20px; fill: rgba(0,0,0,.6); }
+
+  /* ---- composer (scene 3) ---- */
+  .scrim { position: fixed; inset: 0; background: rgba(0,0,0,.5); opacity: 0; z-index: 80; }
+  .composer { position: fixed; z-index: 90; left: 50%; top: 64px; width: 620px;
+    transform: translateX(-50%) scale(.98); opacity: 0;
+    background: #fff; border-radius: 10px; box-shadow: 0 12px 40px rgba(0,0,0,.3); overflow: hidden; }
+  .chead2 { display: flex; align-items: center; gap: 10px; padding: 16px 20px 8px; }
+  .chead2 .avatar { width: 48px; height: 48px; font-size: 17px; }
+  .cname { font-size: 16px; font-weight: 600; }
+  .cwho { font-size: 13px; color: rgba(0,0,0,.6); }
+  .draft { padding: 6px 20px 0; font-size: 16px; line-height: 24px; min-height: 84px; }
+  .caret { display: inline-block; width: 1.5px; height: 18px; background: #0a66c2;
+    vertical-align: -3px; margin-left: 1px; }
+  .dfc { padding: 4px 20px 0; }
+  .dfcbtn { display: inline-block; padding: 3px 11px; font-size: 12px; font-weight: 600;
+    border-radius: 12px; color: #0a66c2; background: rgba(10,102,194,.08); }
+  .dfcout { margin-top: 8px; opacity: 0; }
+  .dfccap { font-size: 12px; color: #808080; }
+  .dfccard { margin-top: 5px; padding: 10px 12px; border: 1px solid rgba(128,128,128,.3); border-radius: 10px; }
+  .dfchead { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+  .dfcava { width: 32px; height: 32px; border-radius: 50%; display: grid; place-items: center;
+    color: #fff; font-weight: 700; font-size: 13px; background: #1d4e78; }
+  .dfcname { font-size: 13px; font-weight: 600; line-height: 1.2; }
+  .dfcmeta { font-size: 11px; color: #808080; }
+  .dfcline { font-size: 14px; line-height: 1.45; margin: 0 0 6px; }
+  .cfoot { display: flex; align-items: center; gap: 18px; padding: 14px 20px 16px; margin-top: 8px; }
+  .cfoot .chip { font-size: 14px; font-weight: 600; color: rgba(0,0,0,.6); }
+  .cpost { margin-left: auto; padding: 6px 16px; border-radius: 16px; background: #0a66c2;
+    color: #fff; font-size: 15px; font-weight: 600; }
+
+  /* ---- fake cursor ---- */
+  .cursor { position: fixed; z-index: 200; width: 22px; height: 22px; opacity: 0;
+    filter: drop-shadow(0 1px 2px rgba(0,0,0,.35)); pointer-events: none; }
+  .ring { position: fixed; z-index: 199; width: 34px; height: 34px; border-radius: 50%;
+    border: 2px solid rgba(10,102,194,.7); opacity: 0; pointer-events: none; }
 </style>
 </head>
 <body>
@@ -110,58 +152,95 @@
     <div class="feed" id="feed"></div>
   </div>
 
+  <div class="scrim" id="scrim"></div>
+  <div class="composer" id="composer">
+    <div class="chead2">
+      <div class="avatar" style="background:#1d4e78">IZ</div>
+      <div>
+        <div class="cname">Itay Zitvar</div>
+        <div class="cwho">Post to Anyone ▾</div>
+      </div>
+    </div>
+    <div class="draft"><span id="drafttext"></span><span class="caret" id="caret"></span></div>
+    <div class="dfc">
+      <span class="dfcbtn" id="dfcbtn">check fluff</span>
+      <div class="dfcout" id="dfcout">
+        <div class="dfccap">readers with defluffer will see:</div>
+        <div class="dfccard">
+          <div class="dfchead">
+            <div class="dfcava">IZ</div>
+            <div>
+              <div class="dfcname">Itay Zitvar</div>
+              <div class="dfcmeta">Just now · defluffed</div>
+            </div>
+          </div>
+          <div class="dfcline">One plus one equals two. You've read this post before.</div>
+          <span class="pill hot">defluffed 88% · see for yourself · really?</span>
+        </div>
+      </div>
+    </div>
+    <div class="cfoot">
+      <span class="chip">✦ Enhance post</span>
+      <span class="chip">🖼</span>
+      <span class="chip">📅</span>
+      <span class="cpost">Post</span>
+    </div>
+  </div>
+
+  <svg class="cursor" id="cursor" viewBox="0 0 24 24"><path d="M5 2l14 9.5-6.2 1.3 3.3 6.6-2.6 1.3-3.3-6.6L5 18.6z" fill="#fff" stroke="#333" stroke-width="1.2" stroke-linejoin="round"/></svg>
+  <div class="ring" id="ring"></div>
+
 <script>
 const POSTS = [
   {
-    name: "Lior Meitar", color:"#3b6ea5", initials:"LM", verified:true, deg:"1st",
+    name:"Lior Meitar", color:"#3b6ea5", initials:"LM", verified:true, deg:"1st",
     headline:"Chief of Staff | Columbia Business School MBA | Ex-Naval Officer", time:"1w",
     original:`Excited to share that I'm joining <a>Venn</a> as Chief of Staff! 🎉 Venn is building agentic AI for multifamily real estate — a space that is massively underserved by modern software. After months of conversations, I knew this was the team I wanted to bet on. Endless gratitude to everyone who supported me on this journey. More to come 🙏<span class="more"> …more</span>`,
-    summary:"Lior joined Venn as Chief of Staff.",
-    react:[["#0a66c2","👍"],["#e0457b","❤️"],["#f5bb5c","👏"]], reactN:"370", comments:"73 comments",
-    media:"linear-gradient(135deg,#6a8fc7,#9b7bd6 60%,#e0a3c4)"
+    summary:"Lior joined Venn as Chief of Staff, building agentic AI for multifamily real estate.",
+    pill:"defluffed 84% · show fluff", tier:"",
+    react:[["#0a66c2","👍"],["#e0457b","❤️"],["#f5bb5c","👏"]], reactN:"370", comments:"73 comments"
   },
   {
-    name:"Mansi Bhamu", color:"#b5651d", initials:"MB", verified:true, deg:"1st",
-    headline:"MBA Candidate, Wharton | Project Leader - BCG | Principal Investors", time:"1w",
-    original:`After an incredible first year at <a>The Wharton School</a>, I'm beyond excited to share that last week I started my summer internship at <a>The Brydon Group</a>, joining the investment team! 🚀 This past year has been a whirlwind of growth, late nights, and the most amazing people. Couldn't be more grateful. Can't wait for everything ahead this summer!<span class="more"> …more</span>`,
-    summary:"Mansi started a summer internship at The Brydon Group.",
-    react:[["#0a66c2","👍"],["#f5bb5c","👏"],["#e0457b","❤️"]], reactN:"214", comments:"41 comments"
-  },
-  {
-    name:"Mingyi Wu", color:"#2e7d6b", initials:"MW", verified:true, deg:"1st",
-    headline:"Wharton MBA '26 | Incoming @ BCG | ex-Bain", time:"22h",
-    original:`Two years ago I left my consulting job with no plan — just a feeling that I needed something more. 🎓 Today I'm officially a Wharton MBA graduate, and this fall I'll be joining <a>BCG</a> in San Diego. To everyone who doubted me, and to everyone who believed in me when I didn't believe in myself — thank you. The journey continues 🙏<span class="more"> …more</span>`,
-    summary:"Mingyi graduated from Wharton MBA and starts at BCG San Diego.",
-    react:[["#0a66c2","👍"],["#e0457b","❤️"],["#f5bb5c","👏"]], reactN:"512", comments:"88 comments",
-    media:"linear-gradient(135deg,#1f2a44,#2e7d6b 70%,#7fc7b3)"
+    name:"Northwind Cloud", color:"#0a66c2", initials:"NC", verified:true, deg:"", promoted:true,
+    headline:"Enterprise infrastructure, reimagined for the AI era", time:"",
+    original:`Your data stack wasn't built for agents. Northwind unifies governance, lineage, and observability in one control plane — so your teams ship AI features without waiting on six approvals. See why 4,000+ engineering orgs made the switch this year.<span class="more"> …more</span>`,
+    summary:"", pill:"", tier:"ad", ad:true,
+    react:[["#0a66c2","👍"]], reactN:"128", comments:"12 comments",
+    media:"linear-gradient(135deg,#0b2b4a,#0a66c2 65%,#5aa9e6)"
   },
   {
     name:"Meghana Dhar", color:"#7a3b9e", initials:"MD", verified:false, deg:"2nd",
     headline:"Ex-Meta, Ex-Snap | Advisor | Keynote Speaker on AI", time:"3d",
-    original:`A lot of enterprise AI projects are failing right now. And guess what? It's NOT a technology problem. I've spoken with 50+ leaders this quarter and the pattern is always the same: no clear ownership, no data strategy, and pilots that never had a path to production. Here are the 5 lessons most companies learn far too late 👇<span class="more"> …more</span>`,
-    summary:"Meghana lists 5 reasons enterprise AI pilots keep failing.",
-    react:[["#0a66c2","👍"],["#f5bb5c","👏"],["#e0457b","❤️"]], reactN:"1,240", comments:"96 comments"
-  },
-  {
-    name:"Gad Shimron", color:"#c0563f", initials:"GS", verified:false, deg:"2nd",
-    headline:"Product @ Stealth | Endurance athlete | Writing about tools", time:"5d",
-    original:`I finally switched from the Apple Watch to a Garmin after 6 years. Here's my honest take after one month 🧵 The Apple Watch is an incredible smartwatch that happens to track fitness. Garmin is a serious training tool that happens to tell time. If you actually train, the difference is night and day. Long thread below.<span class="more"> …more</span>`,
-    summary:"Gad switched from Apple Watch to Garmin for training.",
-    react:[["#0a66c2","👍"],["#e0457b","❤️"]], reactN:"89", comments:"34 comments"
+    original:`Three days. 200 conversations. Countless insights. The AI Summit was nothing short of transformational. Huge thanks to <a>Sarah</a>, <a>Miguel</a>, <a>Priya</a> and the brilliant minds who shared the stage — you know who you are. Still processing everything I learned. More reflections coming this week 🙏<span class="more"> …more</span>`,
+    summary:"Meghana attended the AI Summit. Plus a lot of name-dropping.",
+    pill:"defluffed 91% · show fluff", tier:"warm",
+    react:[["#0a66c2","👍"],["#f5bb5c","👏"]], reactN:"1,240", comments:"96 comments"
   },
   {
     name:"Brianna E. Gurrell", color:"#1d6f8b", initials:"BG", verified:true, deg:"1st",
     headline:"Founder & CEO | Forbes 30 Under 30 | Building the future of X", time:"1w",
-    original:`It's only a matter of time. 🙏🏽 Ten years ago, I immigrated to the U.S. with two suitcases and $300. I didn't speak the language. I slept on a friend's floor for eight months while I figured it out. Today, we just closed our Series A. To every immigrant founder grinding in silence — your time is coming. Keep going ❤️<span class="more"> …more</span>`,
-    summary:"Brianna's startup closed its Series A.",
-    react:[["#e0457b","❤️"],["#0a66c2","👍"],["#f5bb5c","👏"]], reactN:"3,412", comments:"210 comments",
-    media:"linear-gradient(135deg,#0f4c5c,#1d6f8b 60%,#86bfd0)"
+    original:`A janitor once told me something I'll never forget. "Son," he said, "success isn't about talent. It's about who shows up when nobody's watching." I think about that every single day. We spend so long chasing the big moment that we forget the small ones built it. Agree? ♻️ Repost to inspire someone today.<span class="more"> …more</span>`,
+    summary:"Success is about showing up — that's the whole message. Classic engagement bait.",
+    haiku:"A janitor spoke.\nNothing you can verify.\nRepost to inspire.",
+    pill:"defluffed 96% · see for yourself · really?", tier:"hot",
+    react:[["#e0457b","❤️"],["#0a66c2","👍"],["#f5bb5c","👏"]], reactN:"3,412", comments:"210 comments"
+  },
+  {
+    name:"Gad Shimron", color:"#c0563f", initials:"GS", verified:false, deg:"2nd",
+    headline:"Product @ Stealth | Endurance athlete | Writing about tools", time:"5d",
+    original:`We're hiring two senior backend engineers in Tel Aviv. Rust, Postgres, no on-call. DM me.`,
+    summary:"", pill:"fluff not found", tier:"clean", clean:true,
+    react:[["#0a66c2","👍"],["#e0457b","❤️"]], reactN:"89", comments:"34 comments"
   }
 ];
 
+const DRAFT = "I don't usually share personal wins, but after a long journey of self-doubt, late nights, and more coffee than I'd like to admit, I finally cracked a problem I'd been circling for years: 1+1. The answer — and I'm still processing this — is 2.";
+
+const SPIN = ["⠋","⠙","⠹","⠸","⠼","⠴","⠦","⠧","⠇","⠏"];
+const VERBS = ["Monetizing","Upselling","Sponsoring","Synergizing","Retargeting","Converting"];
+
 const VERIF = `<svg class="verif" viewBox="0 0 24 24"><path fill="#f5bb5c" d="M12 2l2.4 1.8 3 .1 1 2.8 2.4 1.7-.9 2.9.9 2.9-2.4 1.7-1 2.8-3 .1L12 22l-2.4-1.8-3-.1-1-2.8L3.2 15l.9-2.9-.9-2.9 2.4-1.7 1-2.8 3-.1z"/><path d="M10.6 14.6l-2.2-2.2-1.1 1.1 3.3 3.3 5.5-5.5-1.1-1.1z" fill="#fff"/></svg>`;
 const GLOBE = `<svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 100 20 10 10 0 000-20zm0 2c1.5 0 3 2.5 3 6H9c0-3.5 1.5-6 3-6zM4.3 11H7c.1-2 .6-3.8 1.4-5.1A8 8 0 004.3 11zM7 13H4.3a8 8 0 003.1 5.1C6.6 16.8 6.1 15 7 13zm2 0h6c0 3.5-1.5 6-3 6s-3-2.5-3-6zm8 0h2.7a8 8 0 01-3.1 5.1c.8-1.3 1.3-3.1 1.4-5.1zm0-2c-.1-2-.6-3.8-1.4-5.1A8 8 0 0119.7 11H17z"/></svg>`;
-const SPARK = `<svg class="spark" viewBox="0 0 24 24"><path d="M12 2l1.8 5.2L19 9l-5.2 1.8L12 16l-1.8-5.2L5 9l5.2-1.8z"/><path d="M19 14l.9 2.6L22 17l-2.1.4L19 20l-.9-2.6L16 17l2.1-.4z"/></svg>`;
 const ICONS = {
   like:`<svg viewBox="0 0 24 24"><path d="M9 21H5a1 1 0 01-1-1v-9a1 1 0 011-1h4v11zm2-11l3.5-7c1.3 0 2.5 1.2 2.5 2.5V8h4a2 2 0 012 2l-1.6 8a2 2 0 01-2 1.6H11V10z" fill="none" stroke="rgba(0,0,0,.6)" stroke-width="1.6"/></svg>`,
   comment:`<svg viewBox="0 0 24 24"><path d="M4 4h16a1 1 0 011 1v11a1 1 0 01-1 1H9l-5 4V5a1 1 0 011-1z" fill="none" stroke="rgba(0,0,0,.6)" stroke-width="1.6"/></svg>`,
@@ -172,14 +251,18 @@ const ICONS = {
 function cardHTML(p){
   const reacts = p.react.map(r=>`<span style="background:${r[0]}">${r[1]}</span>`).join("");
   const media = p.media ? `<div class="media" style="background-image:${p.media}"></div>` : "";
+  const meta = p.promoted
+    ? `<div class="promoted">Promoted</div>`
+    : `<div class="time">${p.time} • ${GLOBE}</div>`;
+  const haikuBtn = p.haiku ? `<span class="haiku">haiku</span>` : "";
   return `<div class="card">
     <div class="glow"></div>
     <div class="chead">
       <div class="avatar" style="background:${p.color}">${p.initials}</div>
       <div class="who">
-        <div class="nmeta"><span class="name">${p.name}</span>${p.verified?VERIF:""}<span class="deg">• ${p.deg}</span></div>
+        <div class="nmeta"><span class="name">${p.name}</span>${p.verified?VERIF:""}${p.deg?`<span class="deg">• ${p.deg}</span>`:""}</div>
         <div class="headline">${p.headline}</div>
-        <div class="time">${p.time} • ${GLOBE}</div>
+        ${meta}
       </div>
       <div class="dots">⋯</div>
     </div>
@@ -187,7 +270,7 @@ function cardHTML(p){
       <div class="original">${p.original}</div>
       <div class="summary">
         <div class="sumtext">${p.summary}</div>
-        <div class="pill">${SPARK} defluffed · show original</div>
+        <div class="pillrow"><span class="pill ${p.tier}">${p.pill}</span>${haikuBtn}</div>
       </div>
     </div>
     ${media}
@@ -208,30 +291,70 @@ function cardHTML(p){
 const feed = document.getElementById("feed");
 feed.innerHTML = POSTS.map(cardHTML).join("");
 
-// Measure original + summary heights for each card, then drive collapse.
+// Measure natural heights once, before any collapse is applied.
 const cards = [...feed.querySelectorAll(".card")];
-const M = cards.map(card=>{
+const M = cards.map((card,i)=>{
   const orig = card.querySelector(".original");
   const sum = card.querySelector(".summary");
+  const sumtext = card.querySelector(".sumtext");
   orig.style.maxHeight="none"; sum.style.maxHeight="none"; sum.style.opacity="1";
-  const oH = orig.offsetHeight, sH = sum.offsetHeight;
-  return {card, orig, sum, glow:card.querySelector(".glow"), oH, sH};
+  const oH = orig.offsetHeight;
+  const sH = sum.offsetHeight;
+  // Poem height must be measured in the EXACT final state — italic text and the
+  // longer "enough poetry" label both move it. Measuring the text alone leaves
+  // the badge row clipped.
+  let pH = sH;
+  if (POSTS[i].haiku){
+    const hEl = card.querySelector(".haiku");
+    const keepText = sumtext.textContent, keepBtn = hEl.textContent;
+    sumtext.textContent = POSTS[i].haiku;
+    sumtext.classList.add("poem");
+    hEl.textContent = "enough poetry";
+    pH = sum.offsetHeight;
+    sumtext.textContent = keepText;
+    sumtext.classList.remove("poem");
+    hEl.textContent = keepBtn;
+  }
+  return {card, orig, sum, sumtext, pill:card.querySelector(".pill"),
+          haikuEl:card.querySelector(".haiku"), glow:card.querySelector(".glow"), oH, sH, pH};
 });
 
-const VH = () => document.querySelector(".stage").clientHeight;
-function smooth(x){ x = Math.max(0, Math.min(1, x)); return x*x*(3-2*x); }
-function smoother(x){ x = Math.max(0, Math.min(1, x)); return x*x*x*(x*(x*6-15)+10); }
+// A "clean" post is never summarized — the original stays, the green badge just
+// appears underneath. Collapse is a no-op for it.
+const CLEAN = POSTS.map(p=>!!p.clean);
 
-// collapse state c in [0,1] for each card
+const stage = document.querySelector(".stage");
+const scrim = document.getElementById("scrim");
+const composer = document.getElementById("composer");
+const drafttext = document.getElementById("drafttext");
+const caret = document.getElementById("caret");
+const dfcbtn = document.getElementById("dfcbtn");
+const dfcout = document.getElementById("dfcout");
+const cursor = document.getElementById("cursor");
+const ring = document.getElementById("ring");
+
+const clamp = (x,a,b)=>Math.max(a,Math.min(b,x));
+const smooth = x => { x = clamp(x,0,1); return x*x*(3-2*x); };
+const smoother = x => { x = clamp(x,0,1); return x*x*x*(x*(x*6-15)+10); };
+// progress of t through [a,b]
+const seg = (t,a,b)=> clamp((t-a)/(b-a), 0, 1);
+
 function setCollapse(i, c){
   const m = M[i];
+  if (CLEAN[i]){
+    // original never hides; the badge fades in on its own
+    m.orig.style.maxHeight = "none";
+    m.orig.style.opacity = "1";
+    m.sum.style.maxHeight = m.sH + "px";
+    m.sum.style.opacity = String(smooth((c-0.25)/0.5));
+    return;
+  }
   const ce = smoother(c);
   m.orig.style.maxHeight = (m.oH*(1-c)) + "px";
   m.orig.style.opacity = String(Math.max(0, 1-ce*1.6));
   m.sum.style.maxHeight = (m.sH*c) + "px";
   m.sum.style.opacity = String(smooth((c-0.30)/0.55));
-  const g = c*(1-c)*4; // peaks at c=0.5, 0 at the ends
-  // outer glow on the card itself (not clipped by overflow:hidden) + faint inner wash
+  const g = c*(1-c)*4; // marking glow peaks mid-transition
   m.card.style.boxShadow =
     `0 0 0 1px rgba(0,0,0,.08), 0 0 0 ${(2*g).toFixed(2)}px rgba(10,102,194,${(0.55*g).toFixed(3)}), `+
     `0 8px 26px rgba(10,102,194,${(0.30*g).toFixed(3)})`;
@@ -239,36 +362,121 @@ function setCollapse(i, c){
   m.glow.style.background = `rgba(10,102,194,${(0.06*g).toFixed(3)})`;
 }
 
-const N_POSTS = POSTS.length;
-const BAND = 0.62;          // how much "front" travel collapses one post
-const HOLD = 0.10;          // initial dwell with post 0 expanded
-const TAIL = 1.6;           // extra travel so last post collapses + scroll settles
-const FOCUS = 0.30;         // active post sits at 30% of viewport
+// --- timeline ---------------------------------------------------------------
+// t is overall progress in [0,1]. Scenes, in order:
+//   scroll+defluff → haiku on the PURE post → composer fluff check
+const T_SCROLL_A = 0.05;  // dwell, post 0 expanded
+const T_SCROLL_B = 0.50;  // scrolling + collapsing finishes
+const T_HAIKU_A  = 0.54;  // cursor moves to the summary
+const T_HAIKU_B  = 0.60;  // click
+const T_HAIKU_C  = 0.70;  // poem fully unfolded (then holds)
+const T_COMP_A   = 0.74;  // composer opens
+const T_TYPE_A   = 0.77;
+const T_TYPE_B   = 0.88;  // draft typed
+const T_CHECK    = 0.91;  // click "check fluff"
+const T_RESULT   = 0.95;  // preview card in
 
-// renderFrame: s in [0,1] overall progress
+const HAIKU_IDX = POSTS.findIndex(p=>p.haiku);
+const BAND = 0.62;  // travel that collapses one post
+const TAIL = 1.5;   // extra travel so the last post lands
+const FOCUS = 0.30; // active post sits at 30% of the viewport
+
+function place(el, x, y){ el.style.transform = `translate(${x}px, ${y}px)`; }
+
 window.renderFrame = function(frame, total){
-  const s = total<=1 ? 0 : frame/(total-1);
-  // shape progress: dwell at start, ease through, settle at end
-  let p;
-  if (s < HOLD) p = 0;
-  else p = smoother((s-HOLD)/(1-HOLD));
-  const front = p * (N_POSTS - 1 + TAIL);
+  const t = total<=1 ? 0 : frame/(total-1);
+  const N = POSTS.length;
 
-  for (let i=0;i<N_POSTS;i++){
-    const c = Math.max(0, Math.min(1, (front - i)/BAND + 0.0));
-    setCollapse(i, c);
-  }
-  // camera: interpolate between card offsets by fractional front
-  const lo = Math.max(0, Math.min(N_POSTS-1, Math.floor(front)));
-  const hi = Math.min(N_POSTS-1, lo+1);
-  const f = Math.max(0, Math.min(1, front - lo));
-  const topLo = M[lo].card.offsetTop;
-  const topHi = M[hi].card.offsetTop;
-  const anchor = topLo*(1-f) + topHi*f;
-  let scroll = anchor - FOCUS*VH() + 8;
-  scroll = Math.max(0, scroll);
+  // ---- scroll + collapse ----
+  const p = smoother(seg(t, T_SCROLL_A, T_SCROLL_B));
+  const front = p * (N - 1 + TAIL);
+  for (let i=0;i<N;i++) setCollapse(i, clamp((front - i)/BAND, 0, 1));
+
+  const lo = clamp(Math.floor(front), 0, N-1);
+  const hi = Math.min(N-1, lo+1);
+  const f = clamp(front - lo, 0, 1);
+  const anchor = M[lo].card.offsetTop*(1-f) + M[hi].card.offsetTop*f;
+  // after the scroll scene, drift back so the PURE post is centred for the haiku
+  const haikuPull = smoother(seg(t, T_SCROLL_B, T_HAIKU_A));
+  const target = anchor*(1-haikuPull) + M[HAIKU_IDX].card.offsetTop*haikuPull;
+  const scroll = Math.max(0, target - FOCUS*stage.clientHeight + 8);
   feed.style.transform = `translateY(${-scroll}px)`;
-  return {s:+s.toFixed(3), front:+front.toFixed(2), scroll:Math.round(scroll)};
+
+  // ---- ad spinner (deterministic: derived from frame, never from a clock) ----
+  const adIdx = POSTS.findIndex(x=>x.ad);
+  if (adIdx >= 0){
+    const tick = Math.floor(frame/5);
+    const verb = VERBS[Math.floor(frame/90) % VERBS.length];
+    M[adIdx].pill.textContent = `${SPIN[tick % SPIN.length]} ad · ${verb}…`;
+  }
+
+  // ---- haiku scene ----
+  const hm = M[HAIKU_IDX];
+  const hb = hm.haikuEl;
+  const reveal = seg(t, T_HAIKU_A, T_HAIKU_B);          // button fades in under the cursor
+  const clicked = t >= T_HAIKU_B;
+  hb.style.opacity = String(clicked ? 0.85 : 0.75*smooth(reveal));
+  hb.classList.toggle("hot", clicked);
+  if (clicked){
+    hb.textContent = "enough poetry";
+    hm.sumtext.textContent = POSTS[HAIKU_IDX].haiku;
+    hm.sumtext.classList.add("poem");
+    // grow the summary box to fit three lines, then release the clamp
+    const grow = smoother(seg(t, T_HAIKU_B, T_HAIKU_C));
+    hm.sum.style.maxHeight = grow >= 1 ? "none" : (hm.sH + (hm.pH-hm.sH)*grow) + "px";
+    hm.sum.style.opacity = "1";
+  } else {
+    hb.textContent = "haiku";
+    hm.sumtext.textContent = POSTS[HAIKU_IDX].summary;
+    hm.sumtext.classList.remove("poem");
+  }
+
+  // ---- composer scene ----
+  const open = smoother(seg(t, T_COMP_A, T_COMP_A+0.03));
+  scrim.style.opacity = String(0.55*open);
+  composer.style.opacity = String(open);
+  composer.style.transform = `translateX(-50%) scale(${(0.98 + 0.02*open).toFixed(3)})`;
+
+  const typed = seg(t, T_TYPE_A, T_TYPE_B);
+  const nChars = Math.round(DRAFT.length * smooth(typed));
+  drafttext.textContent = open > 0 ? DRAFT.slice(0, nChars) : "";
+  caret.style.opacity = (open > 0 && t < T_CHECK && Math.floor(frame/12) % 2 === 0) ? "1" : "0";
+
+  if (t >= T_CHECK && t < T_RESULT) dfcbtn.textContent = "checking…";
+  else dfcbtn.textContent = "check fluff";
+  dfcbtn.style.opacity = t >= T_RESULT ? "0" : "1";   // hides once it has a verdict
+  dfcout.style.opacity = String(smooth(seg(t, T_RESULT, T_RESULT+0.03)));
+
+  // ---- cursor choreography ----
+  // waypoints: idle → haiku button → composer button. Positions are computed
+  // from live element rects so they stay correct if the layout shifts.
+  const hbRect = hb.getBoundingClientRect();
+  const btnRect = dfcbtn.getBoundingClientRect();
+  let cx = 980, cy = 620, vis = 0, press = 0;
+  if (t >= T_SCROLL_B - 0.04 && t < T_COMP_A){
+    const approach = smoother(seg(t, T_SCROLL_B-0.04, T_HAIKU_A));
+    cx = 980*(1-approach) + (hbRect.left + hbRect.width/2)*approach;
+    cy = 620*(1-approach) + (hbRect.top + hbRect.height/2)*approach;
+    vis = smooth(seg(t, T_SCROLL_B-0.04, T_SCROLL_B));
+    press = seg(t, T_HAIKU_B-0.012, T_HAIKU_B) * (t < T_HAIKU_B+0.02 ? 1 : 0);
+  } else if (t >= T_COMP_A){
+    const approach = smoother(seg(t, T_TYPE_B, T_CHECK));
+    const fromX = 620, fromY = 300;
+    cx = fromX*(1-approach) + (btnRect.left + btnRect.width/2)*approach;
+    cy = fromY*(1-approach) + (btnRect.top + btnRect.height/2)*approach;
+    // leave right after the click so the verdict lands in clean space
+    vis = 1 - smooth(seg(t, T_CHECK+0.015, T_CHECK+0.045));
+    press = seg(t, T_CHECK-0.012, T_CHECK) * (t < T_CHECK+0.02 ? 1 : 0);
+  }
+  place(cursor, cx, cy);
+  cursor.style.opacity = String(vis);
+  // click ripple
+  const rs = 0.5 + 0.9*press;
+  place(ring, cx - 17, cy - 17);
+  ring.style.opacity = String(press > 0 ? (1-press)*0.9 : 0);
+  ring.style.width = ring.style.height = (34*rs).toFixed(1) + "px";
+
+  return {t:+t.toFixed(3), front:+front.toFixed(2)};
 };
 
 window.renderFrame(0, 100);
